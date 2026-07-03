@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard | EEE + DELD Virtual Lab</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="dash-body">
+  <div class="dash-shell">
+    <aside class="dash-sidebar">
+      <a class="dash-brand" href="index.html">
+        <img src="assets/mit-logo.png" alt="MIT ADT University">
+        <div>
+          <b>MIT-ADT</b>
+          <span>University<br>Pune, India</span>
+        </div>
+      </a>
+
+      <nav class="dash-menu">
+        <a class="active" href="dashboard.html">⌂ <span>Dashboard</span></a>
+        <p>Labs</p>
+        <a href="experiments.html?subject=EEE">⚡ <span>EEE Virtual Lab</span></a>
+        <a href="experiments.html?subject=DELD">▣ <span>DELD Virtual Lab</span></a>
+        <p>My Work</p>
+        <a href="experiments.html">⚗ <span>My Experiments</span></a>
+        <a href="dashboard.html#results">? <span>Quiz Results</span></a>
+        <a href="dashboard.html#results">▤ <span>Certificates</span></a>
+        <a href="dashboard.html#results">▧ <span>Observations</span></a>
+        <p>Account</p>
+        <a href="dashboard.html">☻ <span>Profile</span></a>
+        <button onclick="logoutUser()">⏻ <span>Logout</span></button>
+      </nav>
+    </aside>
+
+    <main class="dash-main">
+      <header class="dash-top">
+        <div>
+          <h1>EEE + DELD Virtual Lab</h1>
+          <p>Learn. Simulate. Experiment. Excel.</p>
+        </div>
+        <div class="dash-user-mini">
+          <div class="avatar small" id="avatar">R</div>
+          <div><b id="studentName">student</b><span>Engineering Student</span></div>
+        </div>
+      </header>
+
+      <section class="dash-welcome">
+        <div>
+          <h2>Welcome back, <span id="welcomeName">student</span>!</h2>
+          <p>Track your lab progress, quiz scores and certificates.</p>
+        </div>
+        <div class="dash-date">Fri, 26 Jun 2026 &nbsp; | &nbsp; <span id="timeNow">--:--</span></div>
+      </section>
+
+      <section class="dash-stats-row">
+        <div class="dash-stat blue"><span>⚗</span><b>24</b><p>Total Experiments</p><small>12 EEE + 12 DELD</small></div>
+        <div class="dash-stat green"><span>✓</span><b id="completedCount">0/24</b><p>Completed</p><small id="completedSmall">0% completed</small></div>
+        <div class="dash-stat purple"><span>↗</span><b id="avgScore">0%</b><p>Average Score</p><small>Overall Performance</small></div>
+        <div class="dash-stat orange"><span>▤</span><b id="certCount">0</b><p>Certificates</p><small>Earned</small></div>
+      </section>
+
+      <section class="dash-progress-card">
+        <div class="dash-section-title"><h2>Your Progress</h2><b><span id="doneTotal">0</span> / 24</b></div>
+        <div class="dash-progress-line"><div id="progressBar" class="progress-fill"></div></div>
+        <div class="dash-progress-meta"><span>Overall Completion</span><b id="progressPercent">0%</b></div>
+        <div class="subject-progress-grid">
+          <a class="subject-progress eee" href="experiments.html?subject=EEE">
+            <div class="subject-icon">⚡</div><div><b>EEE Virtual Lab</b><span id="eeeProgressText">0 / 12 Completed</span></div><strong id="eeePercent">0%</strong>
+          </a>
+          <a class="subject-progress deld" href="experiments.html?subject=DELD">
+            <div class="subject-icon">▣</div><div><b>DELD Virtual Lab</b><span id="deldProgressText">0 / 12 Completed</span></div><strong id="deldPercent">0%</strong>
+          </a>
+        </div>
+      </section>
+
+      <section class="dash-results-card" id="results">
+        <div class="dash-section-title"><h2>Recent Experiments</h2><a href="experiments.html">View All</a></div>
+        <table class="dash-table">
+          <thead><tr><th>Experiment</th><th>Subject</th><th>Score</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="scoreRows"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+  <script src="assets/js/app.js"></script>
+  <script>renderDashboard()</script>
+</body>
+</html>

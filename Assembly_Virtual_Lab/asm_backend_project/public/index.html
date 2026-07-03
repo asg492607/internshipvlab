@@ -1,0 +1,3208 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASM Virtual Lab — IPCL</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===================================================================
+   ASM VIRTUAL LAB — Stylesheet
+   Theme: clean academic light (navy/blue) + dark counterpart
+   =================================================================== */
+
+:root[data-theme="light"] {
+  --bg:          #f4f7fb;
+  --bg-soft:     #eef2f8;
+  --surface:     #ffffff;
+  --surface-2:   #f8fafd;
+  --border:      #e1e7f0;
+  --border-2:    #d3dceb;
+  --text:        #16213e;
+  --text-dim:    #5b6b88;
+  --text-mute:   #94a3bd;
+  --accent:      #2563eb;
+  --accent-dim:  #eaf1ff;
+  --accent-2:    #0ea5b3;
+  --success:     #15a672;
+  --success-bg:  #e6f7ef;
+  --warn:        #d4920a;
+  --warn-bg:     #fff3da;
+  --danger:      #e0395c;
+  --danger-bg:   #fdeaee;
+  --code-bg:     #0f1830;
+  --code-text:   #dce6f7;
+  --shadow:      0 2px 10px rgba(20,30,60,0.06);
+  --shadow-lg:   0 12px 32px rgba(20,30,60,0.10);
+  --reg-active-glow: 0 0 0 3px rgba(37,99,235,0.18);
+}
+
+:root[data-theme="dark"] {
+  --bg:          #0c1018;
+  --bg-soft:     #11161f;
+  --surface:     #161c28;
+  --surface-2:   #1d2433;
+  --border:      #2a3142;
+  --border-2:    #38415a;
+  --text:        #e7ecf7;
+  --text-dim:    #94a3c0;
+  --text-mute:   #5d6a86;
+  --accent:      #5b9aff;
+  --accent-dim:  #1b2740;
+  --accent-2:    #2dd4d4;
+  --success:     #34d399;
+  --success-bg:  #103226;
+  --warn:        #f2b347;
+  --warn-bg:     #352609;
+  --danger:      #f1647e;
+  --danger-bg:   #3a1620;
+  --code-bg:     #0a0e18;
+  --code-text:   #d7e2f7;
+  --shadow:      0 2px 10px rgba(0,0,0,0.3);
+  --shadow-lg:   0 16px 40px rgba(0,0,0,0.45);
+  --reg-active-glow: 0 0 0 3px rgba(91,154,255,0.28);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background .25s, color .25s;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+a { color: var(--accent); text-decoration: none; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 10px; }
+
+/* ============== THEME TOGGLE ============== */
+/* Icon-only circular button — deliberately a different shape from the
+   profile pill so the two controls never read as one merged element. */
+.theme-toggle {
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: 50%;
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text-dim);
+  transition: all .2s;
+  flex-shrink: 0;
+  padding: 0;
+}
+.theme-toggle:hover { border-color: var(--accent); background: var(--accent-dim); transform: translateY(-1px); }
+.theme-toggle span:last-child { display: none; } /* hide "Dark"/"Light" text label — icon only */
+
+/* on login page: sits in the top-right of the login wrap, not globally fixed */
+.theme-toggle-login {
+  position: absolute;
+  top: 24px; right: 24px;
+  z-index: 50;
+  width: 42px; height: 42px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+/* in navbars: sits inline, with clear breathing room before the profile control */
+.theme-toggle-nav { margin-right: 14px; }
+
+/* ============== PAGES ============== */
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+
+/* ============== LOGIN PAGE ============== */
+#login-page.active { display: flex; align-items: center; justify-content: center; }
+
+.login-wrap {
+  width: 100%; min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 15% 20%, var(--accent-dim) 0%, transparent 45%),
+    radial-gradient(circle at 85% 80%, var(--accent-dim) 0%, transparent 45%),
+    var(--bg);
+}
+
+.login-grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: .5;
+  mask-image: radial-gradient(circle at center, black 0%, transparent 75%);
+}
+
+.login-card {
+  position: relative;
+  width: 430px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 46px 42px;
+  box-shadow: var(--shadow-lg);
+  animation: cardIn .5s ease;
+}
+@keyframes cardIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+.brand-row { display: flex; align-items: center; gap: 13px; margin-bottom: 30px; }
+.brand-mark {
+  width: 46px; height: 46px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(37,99,235,0.25);
+}
+.brand-name { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.25; }
+.brand-sub { font-size: 11.5px; color: var(--text-mute); letter-spacing: .2px; }
+
+.login-h1 { font-size: 25px; font-weight: 700; margin-bottom: 5px; letter-spacing: -.3px; }
+.login-p { font-size: 13.5px; color: var(--text-dim); margin-bottom: 28px; }
+
+.field { margin-bottom: 18px; }
+.field label {
+  display: block; font-size: 11.5px; font-weight: 600; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: .6px; margin-bottom: 7px;
+}
+.field input {
+  width: 100%; background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: 11px; padding: 12px 15px; font-size: 14px; color: var(--text);
+  outline: none; transition: border-color .2s, box-shadow .2s;
+  font-family: inherit;
+}
+.field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+.field input::placeholder { color: var(--text-mute); }
+
+.btn-block {
+  width: 100%; border: none; border-radius: 11px; padding: 13px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff; font-weight: 600; font-size: 14.5px; cursor: pointer;
+  transition: filter .2s, transform .15s;
+  box-shadow: 0 8px 20px rgba(37,99,235,0.22);
+}
+.btn-block:hover { filter: brightness(1.07); transform: translateY(-1px); }
+
+.login-alert {
+  display: none; background: var(--danger-bg); border: 1px solid var(--danger);
+  color: var(--danger); border-radius: 9px; padding: 10px 13px; font-size: 12.5px;
+  margin-bottom: 16px;
+}
+.login-hint {
+  margin-top: 18px; text-align: center; font-size: 11.5px; color: var(--text-mute);
+}
+.login-hint b { color: var(--accent); font-weight: 600; }
+
+/* ---- auth switch link (Sign In <-> Create Account) ---- */
+.auth-switch {
+  margin-top: 22px; text-align: center; font-size: 13px; color: var(--text-dim);
+  padding-top: 18px; border-top: 1px solid var(--border);
+}
+.auth-switch a {
+  color: var(--accent); font-weight: 600; cursor: pointer; text-decoration: none;
+}
+.auth-switch a:hover { text-decoration: underline; }
+
+.login-success {
+  display: none; background: var(--success-bg); border: 1px solid var(--success);
+  color: var(--success); border-radius: 9px; padding: 10px 13px; font-size: 12.5px;
+  margin-bottom: 16px;
+}
+
+.field-hint {
+  font-size: 11px; color: var(--text-mute); margin-top: 6px; line-height: 1.5;
+}
+.field-hint.error { color: var(--danger); }
+.field-hint.ok { color: var(--success); }
+
+.auth-view { display: none; }
+.auth-view.active { display: block; }
+
+.pass-wrap { position: relative; }
+.pass-wrap input { padding-right: 42px; }
+.pass-toggle {
+  position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+  cursor: pointer; font-size: 13px; color: var(--text-mute); background: none; border: none;
+  padding: 4px; line-height: 1;
+}
+.pass-toggle:hover { color: var(--accent); }
+
+/* ============== TOP NAVBAR (app) ============== */
+.navbar {
+  height: 60px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 24px; gap: 22px;
+  position: sticky; top: 0; z-index: 200;
+}
+.navbar .brand-row { margin: 0; }
+.navbar .brand-mark { width: 34px; height: 34px; border-radius: 9px; font-size: 11px; }
+.navbar .brand-name { font-size: 13.5px; }
+.nav-spacer { flex: 1; }
+.nav-pill {
+  font-size: 11px; padding: 3px 10px; border-radius: 6px;
+  background: var(--accent-dim); color: var(--accent); font-weight: 600;
+}
+.nav-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* ---- profile dropdown ---- */
+.nav-profile { position: relative; flex-shrink: 0; }
+.nav-profile-trigger {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--surface-2); border: 1.5px solid var(--border-2);
+  border-radius: 30px; padding: 5px 14px 5px 5px; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--text); font-family: inherit; transition: all .2s;
+}
+.nav-profile-trigger:hover { border-color: var(--accent); background: var(--accent-dim); }
+.nav-profile.open .nav-profile-trigger { border-color: var(--accent); background: var(--accent-dim); }
+.nav-caret { font-size: 10px; color: var(--text-mute); transition: transform .2s; }
+.nav-profile.open .nav-caret { transform: rotate(180deg); }
+
+.nav-profile-menu {
+  position: absolute;
+  top: calc(100% + 10px); right: 0;
+  width: 240px;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+  opacity: 0; visibility: hidden; transform: translateY(-6px);
+  transition: all .18s ease;
+  z-index: 500;
+}
+.nav-profile.open .nav-profile-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.npm-header { display: flex; align-items: center; gap: 11px; padding: 10px 10px 12px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+.npm-avatar { width: 38px; height: 38px; font-size: 14px; }
+.npm-name { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.npm-roll { font-size: 11px; color: var(--text-mute); margin-top: 1px; }
+
+.npm-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 11px; border-radius: 9px; cursor: pointer;
+  font-size: 13px; color: var(--text); transition: background .15s;
+}
+.npm-item:hover { background: var(--surface-2); }
+.npm-item.danger { color: var(--danger); }
+.npm-item.danger:hover { background: var(--danger-bg); }
+.npm-divider { height: 1px; background: var(--border); margin: 6px 4px; }
+.nav-back {
+  background: none; border: 1px solid var(--border-2); border-radius: 8px;
+  padding: 6px 13px; color: var(--text-dim); font-size: 12.5px; cursor: pointer;
+  display: none; align-items: center; gap: 6px;
+}
+.nav-back:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ============== DASHBOARD ============== */
+.dash-wrap { max-width: 1240px; margin: 0 auto; padding: 36px 28px 60px; }
+
+.dash-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 34px 38px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.dash-hero::before {
+  content: ''; position: absolute; right: -60px; top: -60px;
+  width: 260px; height: 260px; border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+}
+.dash-hero h1 { font-size: 27px; font-weight: 700; letter-spacing: -.4px; }
+.dash-hero p { font-size: 14px; color: var(--text-dim); margin-top: 7px; max-width: 640px; }
+
+/* ---- profile page ---- */
+.profile-hero {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+  padding: 32px 36px; margin-bottom: 24px; display: flex; align-items: center; gap: 24px;
+  box-shadow: var(--shadow); position: relative; overflow: hidden;
+}
+.profile-hero::before {
+  content: ''; position: absolute; right: -60px; top: -60px;
+  width: 260px; height: 260px; border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+}
+.profile-avatar-big {
+  width: 76px; height: 76px; border-radius: 22px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 28px;
+  box-shadow: 0 10px 24px rgba(37,99,235,0.25);
+}
+.profile-hero-text h1 { font-size: 24px; font-weight: 700; }
+.profile-hero-text p { font-size: 13.5px; color: var(--text-dim); margin-top: 4px; }
+.profile-tags { display: flex; gap: 8px; margin-top: 12px; }
+
+.profile-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 6px; border-bottom: 1px solid var(--border);
+}
+.profile-row:last-child { border-bottom: none; }
+.profile-row .pr-left { display: flex; align-items: center; gap: 14px; }
+.profile-row .pr-icon {
+  width: 38px; height: 38px; border-radius: 10px; background: var(--accent-dim);
+  display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+}
+.profile-row .pr-title { font-size: 13.5px; font-weight: 600; color: var(--text); }
+.profile-row .pr-sub { font-size: 11.5px; color: var(--text-mute); margin-top: 1px; }
+.profile-row .pr-pct { font-size: 13px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+.dash-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-top: 24px; }
+.dstat {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 13px; padding: 16px 18px;
+}
+.dstat .v { font-size: 22px; font-weight: 700; color: var(--accent); font-family:'JetBrains Mono',monospace; }
+.dstat .l { font-size: 11.5px; color: var(--text-dim); margin-top: 3px; }
+
+.section-label {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-mute); margin: 30px 0 14px;
+}
+
+.exp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+@media (max-width: 1080px) { .exp-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 700px)  { .exp-grid { grid-template-columns: 1fr; } .dash-stats{grid-template-columns:repeat(2,1fr);} }
+
+.exp-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 22px; cursor: pointer; transition: all .2s; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.exp-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+.exp-top { display: flex; align-items: center; justify-content: space-between; }
+.exp-num { font-family:'JetBrains Mono',monospace; font-size: 11px; color: var(--text-mute); font-weight:700; }
+.exp-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 6px;
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.badge-progress { background: var(--warn-bg); color: var(--warn); }
+.badge-done { background: var(--success-bg); color: var(--success); }
+.badge-new { background: var(--accent-dim); color: var(--accent); }
+
+.exp-icon {
+  width: 42px; height: 42px; border-radius: 11px; background: var(--accent-dim);
+  display: flex; align-items: center; justify-content: center; font-size: 19px;
+}
+.exp-title { font-size: 15.5px; font-weight: 700; }
+.exp-desc { font-size: 12.5px; color: var(--text-dim); line-height: 1.5; flex: 1; }
+.exp-foot { display:flex; align-items:center; gap:8px; font-size:11px; color: var(--text-mute); margin-top: 4px;}
+.exp-progress-bar { flex: 1; height: 5px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.exp-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 4px; }
+
+/* ============== EXPERIMENT WORKSPACE ============== */
+.workspace { display: none; }
+.workspace.active { display: flex; min-height: calc(100vh - 60px); }
+
+.exp-header-bar {
+  padding: 26px 32px 0;
+}
+.status-chip {
+  display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; padding: 4px 12px; border-radius: 20px;
+  background: var(--warn-bg); color: var(--warn); margin-bottom: 14px;
+}
+.ws-title { font-size: 32px; font-weight: 800; letter-spacing: -.5px; }
+.ws-sub { font-size: 13.5px; color: var(--text-mute); margin-top: 6px; }
+
+.ws-body { display: flex; width: 100%; padding: 0 32px 50px; gap: 28px; }
+
+/* sidebar (sections) */
+.ws-sidebar { width: 230px; flex-shrink: 0; }
+.sb-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 12px; }
+.sb-item {
+  display: flex; align-items: center; gap: 11px; padding: 10px 12px;
+  border-radius: 11px; cursor: pointer; margin-bottom: 3px; transition: all .15s;
+  border: 1px solid transparent;
+}
+.sb-item:hover { background: var(--surface-2); }
+.sb-item.active { background: var(--accent-dim); border-color: var(--border-2); }
+.sb-num {
+  width: 26px; height: 26px; border-radius: 8px; background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+  color: var(--text-dim); flex-shrink: 0;
+}
+.sb-item.active .sb-num { background: var(--accent); color: #fff; }
+.sb-name { font-size: 13.5px; font-weight: 500; color: var(--text); }
+.sb-item.active .sb-name { color: var(--accent); font-weight: 600; }
+
+.progress-card {
+  margin-top: 26px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px; box-shadow: var(--shadow);
+}
+.progress-card .pc-label { font-size: 10.5px; font-weight:700; letter-spacing:1px; color:var(--text-mute); text-transform:uppercase; margin-bottom:10px;}
+.pc-bar { height: 7px; background: var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+.pc-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+.pc-pct { font-size: 13px; font-weight: 700; }
+.pc-pct span { color: var(--text-dim); font-weight: 400; font-size: 12px; }
+
+/* main content panel */
+.ws-main { flex: 1; min-width: 0; }
+.sec-panel { display: none; }
+.sec-panel.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+
+.content-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+  padding: 32px; box-shadow: var(--shadow); margin-bottom: 20px;
+}
+.cc-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px;}
+.cc-title { font-size: 22px; font-weight: 700; margin-bottom: 14px; letter-spacing: -.3px;}
+.cc-text { font-size: 14.5px; line-height: 1.75; color: var(--text-dim); }
+.cc-text p { margin-bottom: 12px; }
+.cc-text b, .cc-text strong { color: var(--text); }
+.cc-text ul, .cc-text ol { margin: 10px 0 10px 20px; }
+.cc-text li { margin-bottom: 7px; }
+
+.aim-box {
+  background: var(--accent-dim); border: 1px solid var(--border-2); border-radius: 13px;
+  padding: 18px 22px; font-size: 15px; font-weight: 500; color: var(--text);
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.aim-box .ic { font-size: 20px; flex-shrink:0; }
+
+/* theory key-points */
+.kp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+@media (max-width: 720px) { .kp-grid { grid-template-columns: 1fr; } }
+.kp {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px 18px;
+}
+.kp .kp-t { font-size: 13px; font-weight: 700; margin-bottom: 5px; color: var(--accent); }
+.kp .kp-d { font-size: 12.5px; color: var(--text-dim); line-height: 1.6; }
+
+/* components table */
+.comp-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.comp-table th {
+  text-align: left; font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--text-mute); padding: 10px 14px; border-bottom: 2px solid var(--border);
+}
+.comp-table td { padding: 14px; border-bottom: 1px solid var(--border); font-size: 13.5px; vertical-align: middle;}
+.comp-table tr:last-child td { border-bottom: none; }
+.reg-pill {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
+  background: var(--accent-dim); color: var(--accent); padding: 3px 10px; border-radius: 7px;
+  display: inline-block;
+}
+.comp-icon-cell {
+  width: 56px; height: 40px; border-radius: 9px; background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  border: 1px solid var(--border);
+}
+
+/* procedure steps */
+.proc-list { margin-top: 8px; }
+.proc-step { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.proc-step:last-child { border-bottom: none; }
+.proc-num {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff;
+  font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.proc-text { font-size: 14px; line-height: 1.65; color: var(--text-dim); padding-top: 3px; }
+.proc-text b { color: var(--text); }
+.proc-text code { background: var(--surface-2); padding: 2px 7px; border-radius: 5px; font-family:'JetBrains Mono',monospace; font-size: 12.5px; color: var(--accent-2); }
+
+/* code viewer with line-by-line explanation */
+.code-card {
+  background: var(--code-bg); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+}
+.code-card-head {
+  display: flex; align-items: center; gap: 10px; padding: 13px 18px;
+  background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.cc-dots { display: flex; gap: 6px; }
+.cc-dot { width: 11px; height: 11px; border-radius: 50%; }
+.cc-dot.r { background: #ff5c57; } .cc-dot.y { background: #ffbd2e; } .cc-dot.g { background: #28c840; }
+.cc-fname { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8a98b8; margin-left: 4px; }
+
+.code-lines { padding: 4px 0; }
+.code-line {
+  display: flex; gap: 0; padding: 7px 18px; cursor: pointer; transition: background .15s;
+  border-left: 3px solid transparent;
+}
+.code-line:hover { background: rgba(255,255,255,0.04); }
+.code-line.selected { background: rgba(91,154,255,0.10); border-left-color: var(--accent); }
+.cl-num { width: 30px; color: #4a5578; font-family: 'JetBrains Mono', monospace; font-size: 12px; flex-shrink: 0; user-select: none; }
+.cl-code { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--code-text); white-space: pre; }
+.cl-kw { color: #c792ea; } .cl-reg { color: #5fd9c6; } .cl-num2 { color: #f4a771; }
+.cl-str { color: #aee06a; } .cl-cmt { color: #5f6e8f; } .cl-lbl { color: #ffcb6b; } .cl-sec { color: #82b3ff; }
+
+.line-explain-box {
+  margin-top: 14px; background: var(--accent-dim); border: 1px solid var(--border-2);
+  border-radius: 12px; padding: 16px 19px; font-size: 13.5px; line-height: 1.6; color: var(--text);
+  display: none;
+}
+.line-explain-box.show { display: block; }
+.line-explain-box .le-line { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--accent); margin-bottom: 6px; font-weight: 700; }
+
+.hint-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 12px; color: var(--text-mute); }
+.hint-row .k { background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 5px; padding: 1px 7px; font-family: 'JetBrains Mono',monospace; }
+
+/* ============ SIMULATION (register debugger) ============ */
+.sim-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 20px; }
+@media (max-width: 980px) { .sim-grid { grid-template-columns: 1fr; } }
+
+.sim-controls { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.sim-btn {
+  border: 1px solid var(--border-2); background: var(--surface-2); color: var(--text);
+  border-radius: 9px; padding: 9px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 7px; transition: all .15s;
+}
+.sim-btn:hover { border-color: var(--accent); color: var(--accent); }
+.sim-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; border: none; }
+.sim-btn.primary:hover { filter: brightness(1.08); color:#fff; }
+.sim-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.sim-step-indicator {
+  font-size: 12.5px; color: var(--text-dim); margin-bottom: 12px; font-family:'JetBrains Mono',monospace;
+}
+.sim-step-indicator b { color: var(--accent); }
+
+/* register panel */
+.reg-panel {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 22px; box-shadow: var(--shadow);
+}
+.reg-panel-title { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 14px; }
+.reg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.reg-cell {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 11px 14px; transition: all .25s;
+}
+.reg-cell.flash { box-shadow: var(--reg-active-glow); border-color: var(--accent); background: var(--accent-dim); }
+.reg-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-mute); font-weight: 700; }
+.reg-val { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700; color: var(--text); margin-top: 3px; }
+.reg-val .hex { font-size: 11px; color: var(--text-mute); font-weight: 400; margin-left: 6px; }
+
+.flags-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.flag-chip {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+  padding: 5px 10px; border-radius: 7px; background: var(--surface-2); color: var(--text-mute);
+  border: 1px solid var(--border); transition: all .2s;
+}
+.flag-chip.set { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
+
+.console-panel {
+  margin-top: 16px; background: var(--code-bg); border-radius: 12px; padding: 16px 18px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #aee06a; min-height: 50px;
+  border: 1px solid var(--border);
+}
+.console-panel .ph { color: #5f6e8f; }
+
+/* custom input simulator */
+.sim-input-row { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-end; flex-wrap: wrap; }
+.sim-input-group { flex: 1; min-width: 110px; }
+.sim-input-group label { font-size: 11px; font-family:'JetBrains Mono',monospace; color: var(--text-dim); display:block; margin-bottom:6px;}
+.sim-input-group input, .sim-input-group select {
+  width: 100%; background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 9px;
+  padding: 10px 13px; font-size: 15px; font-family: 'JetBrains Mono', monospace; color: var(--text); text-align:center; outline:none;
+}
+.sim-input-group input:focus { border-color: var(--accent); }
+.sim-op { font-size: 22px; color: var(--accent); font-weight: 700; padding-bottom: 9px; }
+
+/* observations */
+.obs-table-wrap { overflow-x: auto; }
+.obs-input-table { width: 100%; border-collapse: collapse; margin-top: 10px;}
+.obs-input-table th { background: var(--surface-2); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-mute); padding: 10px 12px; border: 1px solid var(--border); }
+.obs-input-table td { border: 1px solid var(--border); padding: 8px; }
+.obs-input-table input {
+  width: 100%; border: none; background: transparent; font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--text); padding: 6px; outline: none; text-align:center;
+}
+.obs-input-table input:focus { background: var(--accent-dim); border-radius: 6px; }
+.obs-note {
+  margin-top: 16px; background: var(--success-bg); border: 1px solid var(--success); color: var(--success);
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; display:flex; gap:10px; align-items:flex-start;
+}
+
+/* quiz */
+.quiz-q { margin-bottom: 26px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
+.quiz-q:last-child { border-bottom: none; margin-bottom: 0; }
+.quiz-qtext { font-size: 15px; font-weight: 600; margin-bottom: 14px; display: flex; gap: 10px; }
+.quiz-qnum { color: var(--accent); font-family: 'JetBrains Mono', monospace; flex-shrink:0; }
+.quiz-opts { display: flex; flex-direction: column; gap: 9px; }
+.quiz-opt {
+  display: flex; align-items: center; gap: 12px; padding: 11px 15px; border-radius: 10px;
+  border: 1px solid var(--border-2); cursor: pointer; font-size: 13.5px; transition: all .15s; background: var(--surface-2);
+}
+.quiz-opt:hover { border-color: var(--accent); }
+.quiz-opt.correct { background: var(--success-bg); border-color: var(--success); color: var(--success); font-weight: 600;}
+.quiz-opt.wrong { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); font-weight: 600;}
+.quiz-opt.disabled { pointer-events: none; }
+.opt-letter {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border-2);
+  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink:0;
+}
+.quiz-score-box {
+  text-align: center; padding: 30px; display: none;
+}
+.quiz-score-box.show { display: block; }
+.quiz-score-num { font-size: 44px; font-weight: 800; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+.quiz-score-label { font-size: 13px; color: var(--text-dim); margin-top: 6px; }
+.quiz-retry {
+  margin-top: 18px; border: 1px solid var(--border-2); background: var(--surface-2); border-radius: 9px;
+  padding: 9px 20px; font-size: 13px; cursor: pointer; color: var(--text);
+}
+
+/* footer nav */
+.sec-foot-nav { display: flex; justify-content: space-between; margin-top: 8px; }
+.fn-btn {
+  border: 1px solid var(--border-2); background: var(--surface); border-radius: 10px;
+  padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text);
+  display: flex; align-items: center; gap: 8px; transition: all .15s;
+}
+.fn-btn:hover { border-color: var(--accent); color: var(--accent); }
+.fn-btn.next { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; border: none; }
+.fn-btn.next:hover { filter: brightness(1.08); color: #fff; }
+.fn-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+@media (max-width: 880px) {
+  .ws-body { flex-direction: column; }
+  .ws-sidebar { width: 100%; }
+  .dash-stats { grid-template-columns: repeat(2,1fr); }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN / REGISTER PAGE ══════════════════ -->
+<div id="login-page" class="page active">
+  <div class="login-wrap">
+    <div class="login-grid-bg"></div>
+    <button class="theme-toggle theme-toggle-login" id="theme-toggle-btn-login">
+      <span id="theme-icon-login">🌙</span>
+      <span id="theme-label-login">Dark</span>
+    </button>
+    <div class="login-card">
+      <div class="brand-row">
+        <div class="brand-mark">ASM</div>
+        <div>
+          <div class="brand-name">Assembly Virtual Lab</div>
+          <div class="brand-sub">School of Computing · MIT ADT University</div>
+        </div>
+      </div>
+
+      <!-- ───────── SIGN IN VIEW ───────── -->
+      <div class="auth-view active" id="auth-signin">
+        <div class="login-h1">Welcome back</div>
+        <div class="login-p">Sign in to access the Processor Architecture & Interfacing lab.</div>
+
+        <div class="login-alert" id="login-error">Incorrect password. Please try again.</div>
+        <div class="login-success" id="login-success-msg">Account created — you can sign in now.</div>
+
+        <div class="field">
+          <label>Roll Number</label>
+          <input type="text" id="roll-input" placeholder="e.g. SY-11-2024-014" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <div class="pass-wrap">
+            <input type="password" id="pass-input" placeholder="Enter your password" autocomplete="current-password" />
+            <button type="button" class="pass-toggle" onclick="togglePassVisibility('pass-input', this)">show</button>
+          </div>
+        </div>
+
+        <button class="btn-block" onclick="doLogin()">Sign In →</button>
+
+        <div class="auth-switch">New here? <a onclick="showAuthView('signup')">Create an account</a></div>
+      </div>
+
+      <!-- ───────── SIGN UP VIEW ───────── -->
+      <div class="auth-view" id="auth-signup">
+        <div class="login-h1">Create your account</div>
+        <div class="login-p">Register with your roll number to start the lab. Your progress is saved to this account.</div>
+
+        <div class="login-alert" id="signup-error">Something went wrong.</div>
+
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="signup-name" placeholder="e.g. Soham" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label>Roll Number</label>
+          <input type="text" id="signup-roll" placeholder="e.g. SY-11-2024-014" autocomplete="username" />
+          <div class="field-hint" id="signup-roll-hint"></div>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <div class="pass-wrap">
+            <input type="password" id="signup-pass" placeholder="At least 6 characters" autocomplete="new-password" />
+            <button type="button" class="pass-toggle" onclick="togglePassVisibility('signup-pass', this)">show</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Confirm Password</label>
+          <div class="pass-wrap">
+            <input type="password" id="signup-pass-confirm" placeholder="Re-enter your password" autocomplete="new-password" />
+            <button type="button" class="pass-toggle" onclick="togglePassVisibility('signup-pass-confirm', this)">show</button>
+          </div>
+        </div>
+
+        <button class="btn-block" onclick="doSignup()">Create Account →</button>
+
+        <div class="auth-switch">Already registered? <a onclick="showAuthView('signin')">Sign in</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ DASHBOARD PAGE ══════════════════ -->
+<div id="dashboard-page" class="page">
+  <div class="navbar">
+    <div class="brand-row">
+      <div class="brand-mark">ASM</div>
+      <div class="brand-name">Assembly Virtual Lab</div>
+    </div>
+    <span class="nav-pill">IPCL ·  2026</span>
+    <div class="nav-spacer"></div>
+    <button class="theme-toggle theme-toggle-nav" id="theme-toggle-btn">
+      <span id="theme-icon">🌙</span>
+      <span id="theme-label">Dark</span>
+    </button>
+    <div class="nav-profile" id="nav-profile-1">
+      <button class="nav-profile-trigger" onclick="toggleProfileMenu('nav-profile-1')">
+        <div class="nav-avatar" id="nav-avatar">S</div>
+        <span id="nav-user-name">Student</span>
+        <span class="nav-caret">▾</span>
+      </button>
+      <div class="nav-profile-menu">
+        <div class="npm-header">
+          <div class="nav-avatar npm-avatar" id="nav-avatar-menu-1">S</div>
+          <div>
+            <div class="npm-name" id="npm-name-1">Student</div>
+            <div class="npm-roll">IPCL · SY B.Tech CSE</div>
+          </div>
+        </div>
+        <div class="npm-item" onclick="openProfile()"><span>👤</span> View Profile</div>
+        <div class="npm-item" onclick="switchPage('dashboard-page'); renderDashboard(); closeProfileMenus();"><span>🏠</span> Dashboard</div>
+        <div class="npm-divider"></div>
+        <div class="npm-item danger" onclick="doLogout()"><span>↪</span> Logout</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-wrap">
+    <div class="dash-hero">
+      <h1>Processor Architecture &amp; Interfacing Lab</h1>
+      <p>An interactive virtual lab for learning 8086/NASM Assembly Language Programming — covering fundamentals, arithmetic operations, and string manipulation. Step through each program instruction-by-instruction and watch the registers change in real time.</p>
+      <div class="dash-stats">
+        <div class="dstat"><div class="v" id="stat-total">0</div><div class="l">Experiments</div></div>
+        <div class="dstat"><div class="v" id="stat-done">0</div><div class="l">Completed</div></div>
+        <div class="dstat"><div class="v" id="stat-sections">0</div><div class="l">Sections Each</div></div>
+        <div class="dstat"><div class="v" id="stat-arch">32-bit</div><div class="l">x86 Architecture</div></div>
+      </div>
+    </div>
+
+    <div class="section-label">All Experiments</div>
+    <div class="exp-grid" id="exp-grid"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ EXPERIMENT WORKSPACE PAGE ══════════════════ -->
+<div id="workspace-page" class="page">
+  <div class="navbar">
+    <div class="brand-row">
+      <div class="brand-mark">ASM</div>
+      <div class="brand-name">Assembly Virtual Lab</div>
+    </div>
+    <div class="nav-spacer"></div>
+    <button class="nav-back" id="nav-back-btn" onclick="switchPage('dashboard-page'); renderDashboard();" style="display:flex;">← Dashboard</button>
+    <button class="theme-toggle theme-toggle-nav" id="theme-toggle-btn-2">
+      <span id="theme-icon-2">🌙</span>
+      <span id="theme-label-2">Dark</span>
+    </button>
+    <div class="nav-profile" id="nav-profile-2">
+      <button class="nav-profile-trigger" onclick="toggleProfileMenu('nav-profile-2')">
+        <div class="nav-avatar" id="nav-avatar-2">S</div>
+        <span class="nav-caret">▾</span>
+      </button>
+      <div class="nav-profile-menu">
+        <div class="npm-header">
+          <div class="nav-avatar npm-avatar" id="nav-avatar-menu-2">S</div>
+          <div>
+            <div class="npm-name" id="npm-name-2">Student</div>
+            <div class="npm-roll">IPCL · SY B.Tech CSE</div>
+          </div>
+        </div>
+        <div class="npm-item" onclick="openProfile()"><span>👤</span> View Profile</div>
+        <div class="npm-item" onclick="switchPage('dashboard-page'); renderDashboard(); closeProfileMenus();"><span>🏠</span> Dashboard</div>
+        <div class="npm-divider"></div>
+        <div class="npm-item danger" onclick="doLogout()"><span>↪</span> Logout</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-header-bar">
+    <span class="status-chip">In Progress</span>
+    <div class="ws-title" id="ws-title">Experiment Title</div>
+    <div class="ws-sub" id="ws-sub">00 · Category</div>
+  </div>
+
+  <div class="ws-body">
+    <div class="ws-sidebar">
+      <div class="sb-label">Experiment Sections</div>
+      <div id="ws-sidebar-list"></div>
+
+      <div class="progress-card">
+        <div class="pc-label">Experiment Progress</div>
+        <div class="pc-bar"><div class="pc-fill" id="ws-progress-fill" style="width:0%"></div></div>
+        <div class="pc-pct" id="ws-progress-pct">0% <span>complete</span></div>
+      </div>
+    </div>
+
+    <div class="ws-main" id="ws-main"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ PROFILE PAGE ══════════════════ -->
+<div id="profile-page" class="page">
+  <div class="navbar">
+    <div class="brand-row">
+      <div class="brand-mark">ASM</div>
+      <div class="brand-name">Assembly Virtual Lab</div>
+    </div>
+    <div class="nav-spacer"></div>
+    <button class="nav-back" style="display:flex;" onclick="switchPage('dashboard-page'); renderDashboard();">← Dashboard</button>
+    <button class="theme-toggle theme-toggle-nav" id="theme-toggle-btn-3">
+      <span id="theme-icon-3">🌙</span>
+      <span id="theme-label-3">Dark</span>
+    </button>
+    <div class="nav-profile" id="nav-profile-3">
+      <button class="nav-profile-trigger" onclick="toggleProfileMenu('nav-profile-3')">
+        <div class="nav-avatar" id="nav-avatar-3">S</div>
+        <span class="nav-caret">▾</span>
+      </button>
+      <div class="nav-profile-menu">
+        <div class="npm-item" onclick="switchPage('dashboard-page'); renderDashboard(); closeProfileMenus();"><span>🏠</span> Dashboard</div>
+        <div class="npm-divider"></div>
+        <div class="npm-item danger" onclick="doLogout()"><span>↪</span> Logout</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-wrap">
+    <div class="profile-hero">
+      <div class="profile-avatar-big" id="profile-avatar-big">S</div>
+      <div class="profile-hero-text">
+        <h1 id="profile-name-big">Student</h1>
+        <p>IPCL · Processor Architecture &amp; Interfacing Lab · SY B.Tech CSE</p>
+        <div class="profile-tags">
+          <span class="nav-pill">School of Computing</span>
+          <span class="nav-pill">MIT ADT University</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-stats" style="margin-top:0;">
+      <div class="dstat"><div class="v" id="profile-stat-done">0</div><div class="l">Experiments Completed</div></div>
+      <div class="dstat"><div class="v" id="profile-stat-progress">0</div><div class="l">In Progress</div></div>
+      <div class="dstat"><div class="v" id="profile-stat-quiz">0%</div><div class="l">Avg. Quiz Score</div></div>
+      <div class="dstat"><div class="v" id="profile-stat-total">0</div><div class="l">Total Experiments</div></div>
+    </div>
+
+    <div class="section-label">Experiment Progress</div>
+    <div class="content-card">
+      <div id="profile-progress-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================================================================
+   ASM VIRTUAL LAB — Experiment Data Model (Part 1)
+   Each experiment: { id, num, title, category, icon, aim, theory[],
+   components[], procedure[], code[] (line objects w/ explain),
+   sim: {type:'register'|'io', regsInit, steps[]}, quiz[] }
+   =================================================================== */
+
+const SECTIONS = [
+  { key: 'aim', label: 'Aim' },
+  { key: 'theory', label: 'Theory' },
+  { key: 'components', label: 'Components' },
+  { key: 'procedure', label: 'Procedure' },
+  { key: 'simulation', label: 'Simulation' },
+  { key: 'observations', label: 'Observations' },
+  { key: 'quiz', label: 'Quiz' },
+];
+
+/* ---------- helper to tag asm tokens for highlighting ---------- */
+function hl(line) {
+  let s = line
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s = s.replace(/(;.*)$/g, '<span class="cl-cmt">$1</span>');
+  s = s.replace(/\b(section)\b/g, '<span class="cl-sec">$1</span>');
+  s = s.replace(/\b(global|mov|add|sub|mul|div|int|jmp|je|jne|jz|jnz|jecxz|loop|cld|rep|repe|repne|lodsb|stosb|scasb|cmpsb|movsb|dec|inc|cmp|call|ret|push|pop|or|and|xor|equ|resb|db|%macro|%endmacro)\b/gi, '<span class="cl-kw">$1</span>');
+  s = s.replace(/\b(eax|ebx|ecx|edx|esi|edi|al|bl|cl|dl|ah|bh|ch|dh|ax|bx|cx|dx)\b/g, '<span class="cl-reg">$1</span>');
+  s = s.replace(/\b(\d+h?|0x[0-9a-fA-F]+)\b/g, '<span class="cl-num2">$1</span>');
+  s = s.replace(/('[^']*')/g, '<span class="cl-str">$1</span>');
+  s = s.replace(/^([a-zA-Z_][a-zA-Z0-9_]*:)/g, '<span class="cl-lbl">$1</span>');
+  return s;
+}
+
+function codeLines(rawLines) {
+  return rawLines.map(([code, explain]) => ({ code, html: hl(code), explain }));
+}
+
+const EXPERIMENTS = [
+
+/* =================== EXP 0 — HELLO WORLD =================== */
+{
+  id: 'hello-world',
+  num: '00',
+  title: 'Hello World!! in NASM',
+  category: 'Fundamentals',
+  icon: '👋',
+  aim: 'Write a basic Assembly Language Program (ALP) using NASM to display the message "Hello World" on the screen using a Linux system call (INT 80h).',
+  theory: [
+    { t: 'What is NASM?', d: 'NASM (Netwide Assembler) is an assembler for the x86 architecture that converts assembly source (.asm) into machine code object files (.o), which are then linked into an executable.' },
+    { t: 'Linux System Calls', d: 'Programs in user mode request kernel services (like writing to a screen) via INT 80h. The syscall number goes in EAX, and arguments go in EBX, ECX, EDX in order.' },
+    { t: 'sys_write (call 4)', d: 'EAX=4 invokes sys_write. EBX=file descriptor (1=stdout), ECX=pointer to the buffer/string, EDX=number of bytes to write.' },
+    { t: 'sys_exit (call 1)', d: 'EAX=1 invokes sys_exit. EBX holds the exit/return status code — 0 conventionally means "no errors".' },
+  ],
+  components: [
+    { icon: '📄', name: '.data section', value: 'Static', desc: 'Holds initialized data — here, the message string and its length.' },
+    { icon: '⚙️', name: '.text section', value: 'Code', desc: 'Contains the executable instructions, starting at the _start label.' },
+    { icon: '🔢', name: 'EAX', value: '32-bit', desc: 'Holds the system call number (4 = write, 1 = exit).' },
+    { icon: '🔢', name: 'EBX, ECX, EDX', value: '32-bit', desc: 'Hold syscall arguments: file descriptor, buffer address, and length.' },
+  ],
+  procedure: [
+    'Open a terminal and create a file named <code>helloworld.asm</code> using a text editor.',
+    'Type the NASM source code defining a <code>.data</code> section with the message and a <code>.text</code> section with the syscalls.',
+    'Assemble the file: <code>nasm -f elf -o helloworld.o helloworld.asm</code>',
+    'Link the object file into an executable: <code>ld -m elf_i386 -o helloworld helloworld.o</code>',
+    'Run the executable: <code>./helloworld</code>',
+    'Observe "Hello World" printed to the terminal.',
+  ],
+  code: codeLines([
+    ['section .data', 'Declares the data segment — used for variables that have an initial value before the program runs.'],
+    [`msg db 'Hello World',10`, "Defines a byte string labeled 'msg'. db = 'define byte'. The 10 at the end is the ASCII newline character (\\n)."],
+    ['msglen: equ $-msg', "equ creates a constant. '$' is the current address, so $-msg computes the length of msg in bytes automatically."],
+    ['', ''],
+    ['section .text', 'Declares the code segment — this is where CPU instructions live.'],
+    ['global _start', 'Exports the _start symbol so the linker (ld) knows where the program execution should begin.'],
+    ['_start:', 'Label marking the entry point of the program — execution starts here.'],
+    ['mov eax, 4', 'Loads 4 into EAX — the Linux syscall number for sys_write.'],
+    ['mov ebx, 1', 'Loads 1 into EBX — file descriptor 1 means STDOUT (the terminal screen).'],
+    ['mov ecx, msg', "Loads the memory address of 'msg' into ECX — this is the buffer to write."],
+    ['mov edx, msglen', 'Loads the length of the message (in bytes) into EDX — how many bytes sys_write should output.'],
+    ['int 80h', 'Triggers software interrupt 0x80 — hands control to the Linux kernel, which executes the sys_write call using the registers set above.'],
+    ['mov eax, 1', 'Loads 1 into EAX — the syscall number for sys_exit.'],
+    ['mov ebx, 0', 'Sets exit status to 0, meaning the program terminated with no errors.'],
+    ['int 80h', 'Triggers the interrupt again — kernel now executes sys_exit and the program terminates.'],
+  ]),
+  sim: {
+    type: 'io',
+    desc: 'Step through the syscalls to see how registers are loaded before each INT 80h call, and watch the output build on the simulated console.',
+    steps: [
+      { regs: {EAX:'0x00',EBX:'0x00',ECX:'0x00',EDX:'0x00'}, active: null, console: '', note: 'Initial state — all registers cleared.' },
+      { regs: {EAX:'0x04',EBX:'0x00',ECX:'0x00',EDX:'0x00'}, active: 'EAX', console: '', note: 'EAX = 4 → requesting sys_write.' },
+      { regs: {EAX:'0x04',EBX:'0x01',ECX:'0x00',EDX:'0x00'}, active: 'EBX', console: '', note: 'EBX = 1 → target is STDOUT.' },
+      { regs: {EAX:'0x04',EBX:'0x01',ECX:'msg',EDX:'0x00'}, active: 'ECX', console: '', note: 'ECX = address of msg string.' },
+      { regs: {EAX:'0x04',EBX:'0x01',ECX:'msg',EDX:'0x0C'}, active: 'EDX', console: '', note: 'EDX = 12 → length of "Hello World\\n".' },
+      { regs: {EAX:'0x04',EBX:'0x01',ECX:'msg',EDX:'0x0C'}, active: null, console: 'Hello World', note: 'INT 80h executed → kernel writes the string to the terminal.' },
+      { regs: {EAX:'0x01',EBX:'0x01',ECX:'msg',EDX:'0x0C'}, active: 'EAX', console: 'Hello World', note: 'EAX = 1 → requesting sys_exit.' },
+      { regs: {EAX:'0x01',EBX:'0x00',ECX:'msg',EDX:'0x0C'}, active: 'EBX', console: 'Hello World', note: 'EBX = 0 → exit code 0 (success).' },
+      { regs: {EAX:'0x01',EBX:'0x00',ECX:'msg',EDX:'0x0C'}, active: null, console: 'Hello World\n[process exited, code 0]', note: 'INT 80h executed → program terminates cleanly.' },
+    ]
+  },
+  quiz: [
+    { q: 'Which register holds the Linux system call number?', opts: ['EAX','EBX','ECX','EDX'], correct: 0 },
+    { q: 'What does EBX = 1 mean for sys_write?', opts: ['Exit code 1','Write to STDOUT','Read from STDIN','Buffer length 1'], correct: 1 },
+    { q: 'What instruction transfers control to the Linux kernel?', opts: ['CALL', 'JMP', 'INT 80h', 'RET'], correct: 2 },
+    { q: "What does 'equ $-msg' compute?", opts: ['The address of msg','The length of msg in bytes','The value 80h','The exit code'], correct: 1 },
+  ]
+},
+
+/* =================== EXP 1 — MACRO ALP =================== */
+{
+  id: 'macro-alp',
+  num: '01',
+  title: 'Display Name & Roll Number using Macro',
+  category: 'Fundamentals',
+  icon: '🏷️',
+  aim: 'Write an Assembly Language Program (ALP) using a NASM macro to prompt the user, accept their name and roll number from the keyboard, and display them on screen.',
+  theory: [
+    { t: 'What is a Macro?', d: 'A macro is a reusable named block of instructions defined once with %macro...%endmacro and "called" with arguments, avoiding repetitive code for syscalls used multiple times.' },
+    { t: 'sys_read (call 3)', d: 'EAX=3 invokes sys_read. EBX=file descriptor (0=stdin), ECX=buffer to store input, EDX=max bytes to read.' },
+    { t: 'Macro Parameters', d: 'Inside a macro, %1, %2, %3... refer to the 1st, 2nd, 3rd arguments passed when the macro is invoked.' },
+    { t: '.bss Section', d: 'Reserves uninitialized memory (e.g., resb 10 reserves 10 bytes) — used here to store the name and roll number typed by the user.' },
+  ],
+  components: [
+    { icon: '🧩', name: 'rw macro', value: '4 params', desc: 'Custom macro wrapping mov eax/ebx/ecx/edx + int 80h into one reusable call.' },
+    { icon: '📦', name: '.bss: name1, rollno', value: 'resb 10', desc: 'Uninitialized buffers reserved to hold typed user input.' },
+    { icon: '⌨️', name: 'sys_read (3)', value: 'EBX=0', desc: 'Reads from stdin (the keyboard) into a buffer.' },
+    { icon: '🖨️', name: 'sys_write (4)', value: 'EBX=1', desc: 'Writes prompts and the entered values back to the screen.' },
+  ],
+  procedure: [
+    'Create <code>macro_alp.asm</code> and define the .data section with prompt strings.',
+    'Reserve .bss buffers <code>name1</code> and <code>rollno</code> using <code>resb 10</code>.',
+    'Define a 4-parameter macro <code>rw</code> that performs <code>mov eax/ebx/ecx/edx</code> followed by <code>int 80h</code>.',
+    'Use the macro to print "Enter your Name", read into name1, print "Enter your roll no.", read into rollno.',
+    'Use the macro again to echo back the entered name and roll number.',
+    'Assemble, link, and run: <code>nasm -f elf -o macro_alp.o macro_alp.asm && ld -m elf_i386 -o macro_alp macro_alp.o && ./macro_alp</code>',
+  ],
+  code: codeLines([
+    ['section .data', 'Data segment for initialized prompt strings.'],
+    [`msg1 db 'Enter your Name',10`, 'Prompt string asking for the name, ending with newline (10).'],
+    ['len1: equ $-msg1', 'Computes the byte-length of msg1 automatically.'],
+    [`msg2 db 'Enter your roll no.',10`, 'Prompt string asking for the roll number.'],
+    ['len2: equ $-msg2', 'Length of msg2.'],
+    [`msg3 db 'Entered name & roll no. is',10`, 'A confirmation message printed before echoing the input back.'],
+    ['len3: equ $-msg3', 'Length of msg3.'],
+    ['', ''],
+    ['section .bss', 'Uninitialized data segment — memory reserved but not given a value yet.'],
+    ['name1 resb 10', 'Reserves 10 bytes of memory to store the typed name.'],
+    ['rollno resb 10', 'Reserves 10 bytes of memory to store the typed roll number.'],
+    ['', ''],
+    ['section .text', 'Code segment.'],
+    ['global _start', 'Marks _start as the program entry point for the linker.'],
+    ['_start:', 'Execution begins here.'],
+    ['%macro rw 4', "Begins a macro definition named 'rw' that takes exactly 4 parameters."],
+    ['mov eax, %1', 'First macro argument becomes the syscall number placed in EAX.'],
+    ['mov ebx, %2', 'Second argument becomes the file descriptor in EBX.'],
+    ['mov ecx, %3', 'Third argument becomes the buffer address in ECX.'],
+    ['mov edx, %4', 'Fourth argument becomes the byte count in EDX.'],
+    ['int 80h', 'Executes the syscall configured by the 4 arguments above.'],
+    ['%endmacro', 'Ends the macro definition.'],
+    ['', ''],
+    ['rw 4,1,msg1,len1', 'Calls the macro to sys_write (4) msg1 to stdout (1) — prints "Enter your Name".'],
+    ['rw 3,0,name1,10', 'Calls the macro to sys_read (3) from stdin (0) into name1, up to 10 bytes — waits for keyboard input.'],
+    ['rw 4,1,msg2,len2', 'Prints "Enter your roll no." using the same macro pattern.'],
+    ['rw 3,0,rollno,10', 'Reads the roll number typed by the user into the rollno buffer.'],
+    ['rw 4,1,msg3,10', 'Prints the confirmation message "Entered name & roll no. is".'],
+    ['rw 4,1,name1,10', 'Echoes back the stored name by writing the name1 buffer to stdout.'],
+    ['rw 4,1,rollno,10', 'Echoes back the stored roll number by writing the rollno buffer to stdout.'],
+    ['mov eax, 1', 'Loads the sys_exit syscall number into EAX.'],
+    ['mov ebx, 0', 'Sets the exit status to 0 (no error).'],
+    ['int 80h', 'Terminates the program.'],
+  ]),
+  sim: {
+    type: 'io',
+    desc: 'This program is interactive — type a name and roll number to see how the macro reads input and echoes it back.',
+    interactive: 'name-roll'
+  },
+  quiz: [
+    { q: 'What does %1 refer to inside a NASM macro?', opts: ['The macro name','The first parameter passed to the macro','Register 1','Line 1 of the file'], correct: 1 },
+    { q: 'Which syscall number corresponds to sys_read?', opts: ['1','2','3','4'], correct: 2 },
+    { q: 'What is the purpose of the .bss section here?', opts: ['Store machine code','Reserve uninitialized memory for input buffers','Define constants','Hold the stack'], correct: 1 },
+    { q: 'Why use a macro instead of repeating the mov/int 80h block?', opts: ['It runs faster at runtime','It avoids rewriting the same 5 lines repeatedly, improving readability','It is required by NASM','It changes the syscall behavior'], correct: 1 },
+  ]
+},
+
+/* =================== EXP 2 — ADDITION (GDB, 8-bit) =================== */
+{
+  id: 'addition',
+  num: '02',
+  title: 'Addition of Two 8-bit Numbers',
+  category: 'Arithmetic',
+  icon: '➕',
+  aim: 'Write an ALP to perform addition of two 8-bit unsigned numbers, observe register changes using GDB, and display the result via STDOUT.',
+  theory: [
+    { t: 'ADD instruction', d: 'ADD dest, src computes dest = dest + src and updates the FLAGS register (carry, zero, sign, overflow).' },
+    { t: 'Carry Flag (CF)', d: 'Set to 1 when an unsigned addition overflows the register width (e.g., result of two 8-bit numbers exceeds 255).' },
+    { t: 'ASCII conversion', d: "Keyboard input arrives as ASCII characters ('0'-'9' = 0x30-0x39). Subtracting ASCII '0' (0x30) converts a digit character to its numeric value; adding '0' converts it back for display." },
+    { t: 'GDB debugging', d: 'GDB (GNU Debugger) lets you set breakpoints, step instruction-by-instruction (stepi/ni), and inspect registers live as assembly executes.' },
+  ],
+  components: [
+    { icon: '🔢', name: 'AL', value: '8-bit', desc: 'Lower byte of EAX — holds the first operand and later the result.' },
+    { icon: '🔢', name: 'BL', value: '8-bit', desc: 'Lower byte of EBX — holds the second operand.' },
+    { icon: '⚙️', name: 'ADD', value: 'Instruction', desc: 'Performs AL = AL + BL and sets CF if the unsigned result exceeds 255.' },
+    { icon: '🐞', name: 'GDB', value: 'Tool', desc: 'Used to set a breakpoint at _start and step through instructions with ni / stepi.' },
+  ],
+  procedure: [
+    'Write the ALP loading 121 into AL and 100 into BL, then executing ADD AL, BL.',
+    'Assemble and link: <code>nasm -f elf -o add8 add8.asm && ld -m elf_i386 -o add8 add8.o</code>',
+    'Launch GDB on the executable: <code>gdb add8</code>',
+    'Set the layout: <code>layout asm</code> and <code>layout regs</code>, then <code>set disassembly-flavor intel</code>.',
+    'Set a breakpoint at the entry point: <code>break _start</code>',
+    'Run the program: <code>run</code>',
+    'Step instruction-by-instruction with <code>ni</code> and observe AL, BL update live in the register window.',
+  ],
+  code: codeLines([
+    ['section .data', 'No initialized data needed for this simple register demo.'],
+    ['section .bss', 'No reserved memory needed either — everything happens in registers.'],
+    ['', ''],
+    ['section .text', 'Code segment.'],
+    ['global _start', 'Entry point exported for the linker.'],
+    ['_start:', 'Execution begins here — this is where the GDB breakpoint is set.'],
+    ['mov al, 121', 'Loads the first 8-bit operand (121) into AL.'],
+    ['mov bl, 100', 'Loads the second 8-bit operand (100) into BL.'],
+    ['add al, bl', 'Adds BL to AL: AL = 121 + 100 = 221. Since 221 ≤ 255, no carry flag is set.'],
+    ['mov eax, 1', 'Loads sys_exit syscall number.'],
+    ['mov ebx, 0', 'Exit status 0 — success.'],
+    ['int 80h', 'Terminates the program.'],
+  ]),
+  sim: {
+    type: 'register',
+    desc: 'Use the calculator below to pick two 8-bit values, then step through the ADD instruction to see AL, BL, and the Carry Flag change live — just like watching GDB.',
+    interactive: 'add-debugger'
+  },
+  quiz: [
+    { q: 'What value ends up in AL after "mov al,121 / mov bl,100 / add al,bl"?', opts: ['100','121','221','21'], correct: 2 },
+    { q: 'When is the Carry Flag (CF) set after an 8-bit ADD?', opts: ['When the result is zero','When the unsigned result exceeds 255','When AL equals BL','Never for ADD'], correct: 1 },
+    { q: 'In GDB, which command executes one instruction at a time?', opts: ['run','break','ni or stepi','continue'], correct: 2 },
+    { q: "To convert an ASCII digit like '7' to the integer 7, you should:", opts: ["Add '0' (0x30)","Subtract '0' (0x30)","Multiply by 10","XOR with 0xFF"], correct: 1 },
+  ]
+},
+
+];
+
+/* ===================================================================
+   ASM VIRTUAL LAB — Experiment Data Model (Part 2)
+   Subtraction, Array Sum, Multiplication, Division
+   =================================================================== */
+
+EXPERIMENTS.push(
+
+/* =================== EXP 3 — SUBTRACTION =================== */
+{
+  id: 'subtraction',
+  num: '03',
+  title: 'Subtraction of Two 8-bit Numbers',
+  category: 'Arithmetic',
+  icon: '➖',
+  aim: 'Write an ALP to perform subtraction of two 8-bit numbers using GDB, and a second version that displays the result via STDOUT with a message.',
+  theory: [
+    { t: 'SUB instruction', d: 'SUB dest, src computes dest = dest − src. If src > dest (unsigned), the result wraps around and the Carry Flag (acting as a borrow flag) is set.' },
+    { t: 'Borrow Flag behaviour', d: 'For unsigned 8-bit subtraction, if the minuend is smaller than the subtrahend, CF=1 indicates a borrow occurred and the result is not meaningful as a plain positive number.' },
+    { t: 'Displaying single digit results', d: "After subtracting, adding ASCII '0' (0x30) to a single-digit result converts it back into a printable character for sys_write." },
+  ],
+  components: [
+    { icon: '🔢', name: 'AL', value: '8-bit', desc: 'Holds the minuend (number being subtracted from), then the result.' },
+    { icon: '🔢', name: 'BL', value: '8-bit', desc: 'Holds the subtrahend (number being subtracted).' },
+    { icon: '⚙️', name: 'SUB', value: 'Instruction', desc: 'AL = AL − BL; sets CF as a borrow indicator for unsigned operands.' },
+    { icon: '📦', name: '.bss: res', value: 'resb 1', desc: 'Single byte reserved to hold the ASCII result before printing.' },
+  ],
+  procedure: [
+    'Version A (GDB): load 255 into AL, 100 into BL, execute SUB AL,BL, then debug with GDB exactly like the addition experiment.',
+    'Version B (STDOUT): load 6 into AL and 5 into BL, subtract, convert result to ASCII with <code>add al, "0"</code>, store in <code>res</code>.',
+    'Print the message string, then print the single byte in <code>res</code> using sys_write.',
+    'Assemble, link and run the program to see the textual result printed in the terminal.',
+  ],
+  code: codeLines([
+    ['section .data', 'Data segment holding the result message.'],
+    [`msg db "The subtraction of two 8 bit nos is",10,13`, 'Message string ending in newline (10) and carriage return (13).'],
+    ['len1 equ $-msg', 'Length of the message string, computed automatically.'],
+    ['', ''],
+    ['section .bss', 'Reserved uninitialized memory.'],
+    ['res resb 1', 'One byte reserved to store the ASCII result character.'],
+    ['', ''],
+    ['section .text', 'Code segment.'],
+    ['global _start', 'Entry point exported.'],
+    ['_start:', 'Execution begins here.'],
+    ['mov al, 6', 'Loads the minuend (6) into AL.'],
+    ['mov bl, 5', 'Loads the subtrahend (5) into BL.'],
+    ['sub al, bl', 'AL = AL − BL = 6 − 5 = 1.'],
+    [`add al, '0'`, "Converts the numeric result 1 into the ASCII character '1' (0x31) by adding 0x30."],
+    ['mov [res], al', 'Stores the ASCII result byte into the reserved memory location res.'],
+    ['mov eax, 4', 'Loads sys_write syscall number.'],
+    ['mov ebx, 1', 'Target is STDOUT.'],
+    ['mov ecx, msg', 'Points ECX to the message string.'],
+    ['mov ebx, len1', 'NOTE: this overwrites EBX with the length instead of EDX — a common bug; EDX should hold the length, not EBX.'],
+    ['int 80h', 'Executes sys_write to print the message (length argument is technically miswired here, demonstrating a debugging point).'],
+    ['mov eax, 4', 'Loads sys_write again, to print the result byte.'],
+    ['mov ebx, 1', 'Target is STDOUT.'],
+    ['mov ecx, res', 'Points ECX to the stored ASCII result.'],
+    ['mov edx, 1', 'Length is 1 byte.'],
+    ['int 80h', 'Prints the single result character.'],
+    ['mov eax, 1', 'Loads sys_exit syscall number.'],
+    ['mov ebx, 0', 'Exit status 0.'],
+    ['int 80h', 'Terminates the program.'],
+  ]),
+  sim: {
+    type: 'register',
+    desc: 'Pick two 8-bit values and step through SUB AL, BL to see the borrow (carry) flag behave when BL > AL.',
+    interactive: 'sub-debugger'
+  },
+  quiz: [
+    { q: 'After "mov al,6 / mov bl,5 / sub al,bl", what is in AL?', opts: ['11','1','-1','5'], correct: 1 },
+    { q: 'If AL=3 and BL=9, what happens to the Carry Flag after SUB AL,BL (unsigned)?', opts: ['CF stays 0','CF is set to 1 (borrow)','CF is undefined','SUB does not affect CF'], correct: 1 },
+    { q: "Why add '0' to a subtraction result before printing?", opts: ['To round the number','To convert the numeric value into a printable ASCII character','To clear the carry flag','It is required by sys_write'], correct: 1 },
+    { q: 'Which register should correctly hold the byte-count for sys_write?', opts: ['EAX','EBX','ECX','EDX'], correct: 3 },
+  ]
+},
+
+/* =================== EXP 4 — ARRAY SUM =================== */
+{
+  id: 'array-sum',
+  num: '04',
+  title: 'Sum of Elements in an Array',
+  category: 'Arithmetic',
+  icon: '🧮',
+  aim: 'Write an ALP to add an array of n 16-bit numbers stored in memory and display the result via STDOUT.',
+  theory: [
+    { t: 'Arrays in memory', d: "An array like 'x db 1,2,3,0' is laid out as consecutive bytes in the .data section. Each element is accessed by incrementing a pointer register." },
+    { t: 'Looping with jnz', d: 'JNZ (jump if not zero) checks the Zero Flag — combined with DEC, it creates a simple counted loop that decrements a counter and jumps back until it hits 0.' },
+    { t: 'Indirect addressing', d: "[ecx] dereferences the address held in ECX — 'add ebx,[ecx]' adds the value stored at that memory address, not the address itself." },
+    { t: 'Pointer arithmetic', d: "'add ecx, 1' advances the pointer to the next byte in the array, just like pointer increment in C." },
+  ],
+  components: [
+    { icon: '📦', name: 'x db 1,2,3,0', value: 'array', desc: 'Array of bytes stored in .data — note the program uses the count value 4 from EAX, not array length.' },
+    { icon: '🔢', name: 'EBX', value: 'accumulator', desc: 'Running total — each loop iteration adds the next array element into EBX.' },
+    { icon: '🧭', name: 'ECX', value: 'pointer', desc: 'Points to the current array element; incremented each loop.' },
+    { icon: '🔁', name: 'JNZ t', value: 'loop', desc: 'Jumps back to label t while EAX (the counter) is non-zero.' },
+  ],
+  procedure: [
+    'Declare the array <code>x db 1,2,3,0</code> in .data and reserve <code>sum resb 2</code> in .bss.',
+    'Initialize EAX as the loop counter (4 iterations), EBX as the accumulator (0), ECX pointing to the array.',
+    'Loop label <code>t:</code> — add [ecx] into EBX, increment ECX, decrement EAX, and JNZ back to t while EAX ≠ 0.',
+    "After the loop, convert the sum to ASCII with <code>add ebx, '0'</code> and store it.",
+    'Print the result using sys_write and exit using sys_exit.',
+  ],
+  code: codeLines([
+    ['section .data', 'Initialized data segment.'],
+    ['x db 1,2,3,0', 'Defines an array of 4 bytes: 1, 2, 3, and 0 — stored contiguously in memory.'],
+    ['section .bss', 'Uninitialized memory segment.'],
+    ['sum resb 2', 'Reserves 2 bytes to hold the final sum result.'],
+    ['', ''],
+    ['section .text', 'Code segment.'],
+    ['global _start', 'Program entry point.'],
+    ['_start:', 'Execution begins here.'],
+    ['mov eax, 4', 'Sets EAX as the loop counter — 4 elements to process.'],
+    ['mov ebx, 0', 'Initializes EBX to 0 — this will accumulate the running sum.'],
+    ['mov ecx, x', 'Points ECX at the start address of array x.'],
+    ['t:', 'Loop label — the jump target for repeating the addition.'],
+    ['add ebx, [ecx]', 'Dereferences ECX (reads the byte at that address) and adds it into the accumulator EBX.'],
+    ['add ecx, 1', 'Advances the pointer ECX by 1 byte to point at the next array element.'],
+    ['dec eax', 'Decrements the loop counter EAX by 1.'],
+    ['jnz t', 'If EAX is not zero (more elements remain), jump back to label t and repeat.'],
+    ['', ''],
+    [`add ebx, '0'`, 'Converts the final numeric sum into a printable ASCII character.'],
+    ['mov [sum], ebx', 'Stores the ASCII result into the reserved sum buffer.'],
+    ['mov eax, 4', 'Loads sys_write syscall number.'],
+    ['mov ebx, 1', 'Target is STDOUT.'],
+    ['mov ecx, sum', 'Points ECX at the sum buffer to print.'],
+    ['mov edx, 2', 'Specifies 2 bytes to write.'],
+    ['int 80h', 'Executes sys_write — prints the sum.'],
+    ['mov eax, 1', 'Loads sys_exit syscall number.'],
+    ['mov ebx, 0', 'Exit status 0.'],
+    ['int 80h', 'Terminates the program.'],
+  ]),
+  sim: {
+    type: 'register',
+    desc: 'Edit the array values and step through each loop iteration to watch EBX accumulate, ECX advance, and EAX count down to zero.',
+    interactive: 'array-debugger'
+  },
+  quiz: [
+    { q: 'What does "add ebx, [ecx]" do?', opts: ['Adds the address in ECX to EBX','Adds the value stored at the memory address in ECX to EBX','Moves ECX into EBX','Adds 1 to ECX'], correct: 1 },
+    { q: 'What condition keeps the JNZ loop repeating?', opts: ['EAX equals zero','EAX is not zero','ECX equals zero','The carry flag is set'], correct: 1 },
+    { q: 'For the array {1,2,3,0} summed with EAX=4 iterations, what is the total before ASCII conversion?', opts: ['3','6','10','4'], correct: 1 },
+    { q: 'What does "add ecx, 1" achieve in this loop?', opts: ['Increments the sum','Advances the pointer to the next array byte','Increments the loop counter','Sets the carry flag'], correct: 1 },
+  ]
+},
+
+/* =================== EXP 5 — MULTIPLICATION =================== */
+{
+  id: 'multiplication',
+  num: '05',
+  title: 'Multiplication of Two 8-bit Numbers',
+  category: 'Arithmetic',
+  icon: '✖️',
+  aim: 'Write an ALP to perform multiplication of two 8-bit numbers entered by the user, and display the result with prompt messages via STDOUT.',
+  theory: [
+    { t: 'MUL instruction', d: 'MUL src multiplies the AL register by src (unsigned) and stores the full result in AX (16-bit) — because two 8-bit numbers can produce up to a 16-bit product.' },
+    { t: 'Why AX and not AL?', d: 'The largest possible product of two 8-bit numbers (255 × 255 = 65,025) does not fit in 8 bits, so the CPU automatically widens the result into the 16-bit AX register.' },
+    { t: 'Single-digit constraint', d: 'This lab exercise assumes single-digit inputs (0–9) so the product (max 81) still fits for simple ASCII display in AL.' },
+    { t: 'Macro reuse', d: 'The same 4-parameter rw macro from Experiment 1 is reused here for all sys_read/sys_write calls, showing how macros reduce repetition across programs.' },
+  ],
+  components: [
+    { icon: '🔢', name: 'AL', value: '8-bit', desc: 'Holds the first operand (after ASCII-to-numeric conversion), then the low byte of the result.' },
+    { icon: '🔢', name: 'BL', value: '8-bit', desc: 'Holds the second operand for the MUL instruction.' },
+    { icon: '⚙️', name: 'MUL BL', value: 'Instruction', desc: 'Computes AX = AL × BL (unsigned multiply), the full 16-bit product.' },
+    { icon: '🧩', name: 'rw macro', value: '4 params', desc: 'Reused I/O macro for prompting and reading the two numbers.' },
+  ],
+  procedure: [
+    'Prompt "Enter the first no." and read into n1; prompt "Enter the second no." and read into n2.',
+    "Load n1 into AL, subtract '0' to convert ASCII to numeric value.",
+    "Load n2 into BL, subtract '0' similarly.",
+    'Execute <code>mul bl</code> — the product appears in AX (AL holds the result for single-digit cases).',
+    "Add '0' back to AL to convert to ASCII, store in res, and print with the macro.",
+  ],
+  code: codeLines([
+    ['section .data', 'Initialized data for prompts.'],
+    [`m1 db 'Enter the first no.',10`, 'Prompt for the first number.'],
+    ['l1: equ $-m1', 'Length of prompt 1.'],
+    [`m2 db 'Enter the second no.',10`, 'Prompt for the second number.'],
+    ['l2: equ $-m2', 'Length of prompt 2.'],
+    [`m3 db 'Multiplication of two no.s is',10`, 'Result message.'],
+    ['l3: equ $-m3', 'Length of result message.'],
+    ['', ''],
+    ['section .bss', 'Reserved memory.'],
+    ['n1 resb 1', 'Stores the first digit typed by the user (as ASCII).'],
+    ['n2 resb 1', 'Stores the second digit typed by the user (as ASCII).'],
+    ['res resb 1', 'Stores the ASCII result.'],
+    ['', ''],
+    ['section .text', 'Code segment.'],
+    ['global _start', 'Entry point.'],
+    ['_start:', 'Execution begins here.'],
+    ['%macro rw 4', 'Defines the reusable I/O macro (same pattern as Experiment 1).'],
+    ['mov eax,%1', 'Syscall number from 1st argument.'],
+    ['mov ebx,%2', 'File descriptor from 2nd argument.'],
+    ['mov ecx,%3', 'Buffer address from 3rd argument.'],
+    ['mov edx,%4', 'Byte count from 4th argument.'],
+    ['int 80h', 'Executes the configured syscall.'],
+    ['%endmacro', 'Ends macro definition.'],
+    ['', ''],
+    ['rw 4,1,m1,l1', 'Prints "Enter the first no.".'],
+    ['rw 3,0,n1,2', 'Reads the first digit (and newline) from the keyboard into n1.'],
+    ['rw 4,1,m2,l2', 'Prints "Enter the second no.".'],
+    ['rw 3,0,n2,2', 'Reads the second digit into n2.'],
+    ['', ''],
+    ['mov al, [n1]', 'Loads the first typed character (ASCII) into AL.'],
+    [`sub al, '0'`, 'Converts the ASCII digit into its numeric value (e.g., \'7\' → 7).'],
+    ['mov bl, [n2]', 'Loads the second typed character into BL.'],
+    [`sub bl, '0'`, 'Converts it to numeric form as well.'],
+    ['mul bl', 'Multiplies AL by BL (unsigned); the full product is placed in AX.'],
+    [`add al, '0'`, 'Converts the numeric product back into a printable ASCII character.'],
+    ['mov [res], al', 'Stores the ASCII result.'],
+    ['', ''],
+    ['rw 4,1,m3,l3', 'Prints the message "Multiplication of two no.s is".'],
+    ['rw 4,1,res,1', 'Prints the single-character result.'],
+    ['', ''],
+    ['mov eax, 1', 'Loads sys_exit syscall number.'],
+    ['mov ebx, 0', 'Exit status 0.'],
+    ['int 80h', 'Terminates the program.'],
+  ]),
+  sim: {
+    type: 'register',
+    desc: 'Choose two digits and step through MUL BL to see how the result fills the full AX register, not just AL.',
+    interactive: 'mul-debugger'
+  },
+  quiz: [
+    { q: 'After MUL BL, where does the full result of an 8×8-bit multiply go?', opts: ['AL only','AX (16-bit)','BL only','It is discarded'], correct: 1 },
+    { q: 'Why might AL alone be insufficient to hold a multiplication result?', opts: ['AL is read-only','The product of two 8-bit numbers can exceed 255, needing 16 bits','MUL does not use AL','It is a NASM syntax restriction'], correct: 1 },
+    { q: 'If n1 holds ASCII "5" and n2 holds ASCII "3", what numeric product is computed?', opts: ['8','15','53','35'], correct: 1 },
+    { q: 'What is the purpose of the rw macro reused in this program?', opts: ['It performs the multiplication','It wraps the repeated read/write syscall pattern into one reusable call','It converts ASCII to hex','It sets the carry flag'], correct: 1 },
+  ]
+},
+
+/* =================== EXP 6 — DIVISION =================== */
+{
+  id: 'division',
+  num: '06',
+  title: 'Division of Two 8-bit Numbers',
+  category: 'Arithmetic',
+  icon: '➗',
+  aim: 'Write an ALP to divide an 8-bit number by another 8-bit number, accepting both from the user, and display the quotient and remainder.',
+  theory: [
+    { t: 'DIV instruction', d: 'DIV src divides AX by src (unsigned). The quotient is stored in AL and the remainder in AH — this is one of the few instructions that produces two distinct results in one step.' },
+    { t: 'Why AX as dividend?', d: 'DIV BL treats AX (16-bit) as the dividend even though we only load AL — the upper byte AH must be cleared (implicitly 0 here) so it does not corrupt the division.' },
+    { t: 'Division by zero', d: 'If the divisor is 0, DIV triggers a CPU exception (#DE) and crashes the program — real programs must check for this before dividing.' },
+    { t: 'Quotient vs Remainder', d: 'For 17 ÷ 5: quotient = 3 (AL), remainder = 2 (AH). Both values typically need separate ASCII conversion before being printed.' },
+  ],
+  components: [
+    { icon: '🔢', name: 'AL', value: '8-bit', desc: 'Holds the dividend before division; holds the quotient after DIV executes.' },
+    { icon: '🔢', name: 'AH', value: '8-bit', desc: 'Holds the remainder after DIV executes (upper byte of AX).' },
+    { icon: '🔢', name: 'BL', value: '8-bit', desc: 'Holds the divisor.' },
+    { icon: '⚙️', name: 'DIV BL', value: 'Instruction', desc: 'Performs AX ÷ BL → AL=quotient, AH=remainder.' },
+  ],
+  procedure: [
+    'Prompt for and read the dividend into n1, and the divisor into n2.',
+    "Convert both from ASCII to numeric using sub '0'.",
+    'Load the dividend into AL and the divisor into BL, then execute <code>div bl</code>.',
+    'AL now holds the quotient; AH holds the remainder — convert each back to ASCII separately.',
+    'Print the quotient and remainder with their respective labels using sys_write.',
+  ],
+  code: codeLines([
+    ['section .data', 'Prompt and result message strings.'],
+    [`m1 db 'Enter dividend',10`, 'Prompt for the dividend.'],
+    ['l1: equ $-m1', 'Length of prompt 1.'],
+    [`m2 db 'Enter divisor',10`, 'Prompt for the divisor.'],
+    ['l2: equ $-m2', 'Length of prompt 2.'],
+    [`m3 db 'Quotient is',10`, 'Label for the quotient result.'],
+    ['l3: equ $-m3', 'Length of label 3.'],
+    [`m4 db 'Remainder is',10`, 'Label for the remainder result.'],
+    ['l4: equ $-m4', 'Length of label 4.'],
+    ['', ''],
+    ['section .bss', 'Reserved memory.'],
+    ['n1 resb 1', 'Stores the typed dividend digit.'],
+    ['n2 resb 1', 'Stores the typed divisor digit.'],
+    ['q resb 1', 'Stores the ASCII quotient.'],
+    ['r resb 1', 'Stores the ASCII remainder.'],
+    ['', ''],
+    ['section .text', 'Code segment.'],
+    ['global _start', 'Entry point.'],
+    ['_start:', 'Execution begins here.'],
+    ['%macro rw 4', 'I/O macro definition (same pattern as before).'],
+    ['mov eax,%1', 'Syscall number.'],
+    ['mov ebx,%2', 'File descriptor.'],
+    ['mov ecx,%3', 'Buffer address.'],
+    ['mov edx,%4', 'Byte count.'],
+    ['int 80h', 'Executes the syscall.'],
+    ['%endmacro', 'Ends macro.'],
+    ['', ''],
+    ['rw 4,1,m1,l1', 'Prints "Enter dividend".'],
+    ['rw 3,0,n1,2', 'Reads the dividend digit into n1.'],
+    ['rw 4,1,m2,l2', 'Prints "Enter divisor".'],
+    ['rw 3,0,n2,2', 'Reads the divisor digit into n2.'],
+    ['', ''],
+    ['mov al, [n1]', 'Loads the dividend character into AL.'],
+    [`sub al, '0'`, 'Converts ASCII to numeric value.'],
+    ['mov bl, [n2]', 'Loads the divisor character into BL.'],
+    [`sub bl, '0'`, 'Converts ASCII to numeric value.'],
+    ['div bl', 'Divides AX by BL: AL = quotient, AH = remainder.'],
+    [`add al, '0'`, 'Converts the quotient to ASCII.'],
+    ['mov [q], al', 'Stores the ASCII quotient.'],
+    [`add ah, '0'`, 'Converts the remainder to ASCII.'],
+    ['mov [r], ah', 'Stores the ASCII remainder.'],
+    ['', ''],
+    ['rw 4,1,m3,l3', 'Prints "Quotient is".'],
+    ['rw 4,1,q,1', 'Prints the quotient character.'],
+    ['rw 4,1,m4,l4', 'Prints "Remainder is".'],
+    ['rw 4,1,r,1', 'Prints the remainder character.'],
+    ['', ''],
+    ['mov eax, 1', 'Loads sys_exit syscall number.'],
+    ['mov ebx, 0', 'Exit status 0.'],
+    ['int 80h', 'Terminates the program.'],
+  ]),
+  sim: {
+    type: 'register',
+    desc: 'Pick a dividend and divisor and step through DIV BL to see AL (quotient) and AH (remainder) populate — and see what happens if you try dividing by zero.',
+    interactive: 'div-debugger'
+  },
+  quiz: [
+    { q: 'After DIV BL, where is the remainder stored?', opts: ['AL','AH','BL','BH'], correct: 1 },
+    { q: 'What happens if BL = 0 when DIV BL executes?', opts: ['AL becomes 0','The program crashes with a divide-by-zero exception','AH becomes 0xFF','Nothing, DIV ignores zero divisors'], correct: 1 },
+    { q: 'For dividend 17 and divisor 5, what are the quotient and remainder?', opts: ['3 and 2','2 and 3','5 and 17','17 and 0'], correct: 0 },
+    { q: 'Which register pair does DIV use as the 16-bit dividend by convention?', opts: ['BX','CX','AX (AH:AL)','DX'], correct: 2 },
+  ]
+}
+
+);
+
+/* ===================================================================
+   ASM VIRTUAL LAB — Experiment Data Model (Part 3)
+   String Copy, Uppercase->Lowercase, Character Search, String Compare
+   =================================================================== */
+
+EXPERIMENTS.push(
+
+/* =================== EXP 7 — STRING COPY =================== */
+{
+  id: 'string-copy',
+  num: '07',
+  title: 'Copy of a String',
+  category: 'String Manipulation',
+  icon: '📋',
+  aim: 'Write an ASM program to copy a source string to a destination string (source pointed by DS:SI, destination by ES:DI) and display it on the console.',
+  theory: [
+    { t: 'String instructions', d: 'x86 provides dedicated string instructions (MOVSB, LODSB, STOSB, SCASB, CMPSB) that operate using SI (source index), DI (destination index), and a direction flag.' },
+    { t: 'MOVSB', d: 'Copies one byte from [SI] (or [ESI]) to [DI] (or [EDI]), then automatically advances both SI and DI by 1 (if the direction flag is clear).' },
+    { t: 'CLD instruction', d: 'Clears the Direction Flag (DF=0), forcing SI/DI to increment (move forward) after each string instruction, rather than decrement.' },
+    { t: 'REP prefix', d: 'REP repeats the following string instruction ECX times, decrementing ECX after each repetition — effectively creating a hardware-assisted loop.' },
+  ],
+  components: [
+    { icon: '🧭', name: 'ESI', value: 'pointer', desc: 'Source Index — points to the next byte to read from the source string.' },
+    { icon: '🧭', name: 'EDI', value: 'pointer', desc: 'Destination Index — points to where the next byte will be written.' },
+    { icon: '🔢', name: 'ECX', value: 'counter', desc: 'Holds the number of bytes to copy — decremented automatically by REP.' },
+    { icon: '⚙️', name: 'REP MOVSB', value: 'Instruction', desc: 'Repeatedly copies bytes from [ESI] to [EDI] until ECX reaches 0.' },
+  ],
+  procedure: [
+    "Define the source string s1 db 'Hello, world!',0 and compute its length.",
+    'Reserve a destination buffer s2 resb 20 in .bss.',
+    'Load ECX with the string length, ESI with the source address, EDI with the destination address.',
+    'Execute CLD (clear direction flag) then REP MOVSB to copy byte-by-byte.',
+    'Print the destination buffer s2 using sys_write, then exit.',
+  ],
+  code: codeLines([
+    ['section .data', 'Initialized data segment.'],
+    [`s1 db 'Hello, world!',0`, 'Source string, null-terminated.'],
+    ['len equ $-s1', 'Computes the length of s1 (including the null terminator).'],
+    ['', ''],
+    ['section .bss', 'Reserved memory.'],
+    ['s2 resb 20', 'Destination buffer — 20 bytes reserved to receive the copied string.'],
+    ['', ''],
+    ['section .text', 'Code segment.'],
+    ['global _start', 'Entry point exported for the linker.'],
+    ['_start:', 'Execution begins here.'],
+    ['mov ecx, len', 'Loads ECX with the number of bytes to copy.'],
+    ['mov esi, s1', 'Points ESI (source index) at the start of the source string s1.'],
+    ['mov edi, s2', 'Points EDI (destination index) at the start of buffer s2.'],
+    ['cld', 'Clears the direction flag so SI/DI increment forward after each copy.'],
+    ['rep movsb', 'Repeats "copy byte from [ESI] to [EDI], increment both" ECX times — copying the entire string.'],
+    ['', ''],
+    ['mov eax, 4', 'Loads sys_write syscall number.'],
+    ['mov ebx, 1', 'Target is STDOUT.'],
+    ['mov ecx, s2', 'Points ECX at the destination buffer to print.'],
+    ['mov edx, 20', 'Specifies 20 bytes to write (the buffer size).'],
+    ['int 80h', 'Executes sys_write — prints the copied string.'],
+    ['', ''],
+    ['mov eax, 1', 'Loads sys_exit syscall number.'],
+    ['int 80h', 'Terminates the program (EBX left over from before is reused as exit code here).'],
+  ]),
+  sim: {
+    type: 'register',
+    desc: 'Type a string and watch REP MOVSB copy it character by character, with ESI and EDI advancing together and ECX counting down.',
+    interactive: 'strcopy-debugger'
+  },
+  quiz: [
+    { q: 'What does MOVSB do in one execution?', opts: ['Compares two bytes','Copies a byte from [ESI] to [EDI] and advances both pointers','Searches for a byte','Clears a byte'], correct: 1 },
+    { q: 'What does CLD do before a string operation?', opts: ['Clears ECX','Clears the Direction Flag so pointers increment forward','Clears the destination buffer','Disables interrupts'], correct: 1 },
+    { q: 'How many times does REP MOVSB execute MOVSB?', opts: ['Once','Until a null byte is found','ECX times','Forever'], correct: 2 },
+    { q: 'Which register points to the source string in this experiment?', opts: ['EDI','ESI','EBX','EDX'], correct: 1 },
+  ]
+},
+
+/* =================== EXP 8 — UPPER TO LOWER =================== */
+{
+  id: 'upper-to-lower',
+  num: '08',
+  title: 'Convert Uppercase String to Lowercase',
+  category: 'String Manipulation',
+  icon: '🔡',
+  aim: "Write an ASM program to convert an uppercase string to lowercase (e.g. 'HELLO WORLD' → 'hello world') using LODSB and STOSB, and display the result.",
+  theory: [
+    { t: 'ASCII case difference', d: "Uppercase and lowercase ASCII letters differ by exactly bit 5 (0x20). 'A' = 0x41, 'a' = 0x61 — setting bit 5 with OR converts upper to lower." },
+    { t: 'LODSB', d: 'Loads the byte at [ESI] into AL, then increments ESI — used to read one character at a time from a string.' },
+    { t: 'STOSB', d: 'Stores the byte in AL into [EDI], then increments EDI — used to write the (possibly modified) character to the destination.' },
+    { t: 'OR AL, 0x20', d: "Setting bit 5 of an ASCII letter forces it lowercase, regardless of whether it started upper or lower — a fast, branchless case-conversion trick." },
+  ],
+  components: [
+    { icon: '🔢', name: 'AL', value: '8-bit', desc: 'Temporarily holds each character while it is loaded, modified, and stored.' },
+    { icon: '🧭', name: 'ESI / EDI', value: 'pointers', desc: 'Source and destination indices, advanced one byte at a time by LODSB / STOSB.' },
+    { icon: '⚙️', name: 'OR AL, 20h', value: 'Instruction', desc: 'Sets bit 5 of the character, converting any letter to its lowercase form.' },
+    { icon: '🔁', name: 'LOOP', value: 'Instruction', desc: 'Decrements ECX and jumps back to the label while ECX ≠ 0, iterating over every character.' },
+  ],
+  procedure: [
+    "Define the uppercase source string, e.g. s1 db 'VOYAGER31' and compute its length.",
+    'Reserve a 20-byte destination buffer s2 in .bss.',
+    'Set ECX to the string length, ESI to s1, EDI to s2.',
+    'Loop: LODSB (read char into AL) → OR AL,0x20 (force lowercase) → STOSB (write to destination) → LOOP back.',
+    'Print the lowercase result from s2 using sys_write.',
+  ],
+  code: codeLines([
+    ['section .data', 'Initialized data segment.'],
+    [`s1 db 'VOYAGER31'`, 'The uppercase source string to convert.'],
+    ['len equ $-s1', "Computes the length of s1 automatically."],
+    ['', ''],
+    ['section .bss', 'Reserved memory.'],
+    ['s2 resb 20', 'Destination buffer for the lowercase result.'],
+    ['', ''],
+    ['section .text', 'Code segment.'],
+    ['global _start', 'Entry point exported.'],
+    ['_start:', 'Execution begins here.'],
+    ['mov ecx, len', 'Sets the loop counter to the string length.'],
+    ['mov esi, s1', 'Points ESI at the source string.'],
+    ['mov edi, s2', 'Points EDI at the destination buffer.'],
+    ['', ''],
+    ['UpptoLow:', 'Label marking the start of the conversion loop.'],
+    ['lodsb', 'Loads the byte at [ESI] into AL, then auto-increments ESI to the next character.'],
+    ['or al, 20h', "Sets bit 5 of AL — forces the character lowercase (e.g. 'V' 0x56 → 'v' 0x76)."],
+    ['stosb', 'Stores AL into [EDI], then auto-increments EDI to the next destination slot.'],
+    ['loop UpptoLow', 'Decrements ECX; if ECX ≠ 0, jumps back to UpptoLow to process the next character.'],
+    ['cld', 'Clears the direction flag (defensive — ensures forward direction for any subsequent string ops).'],
+    ['rep movsb', 'NOTE: leftover instruction from a copy/paste — with ECX now 0 from the loop above, this executes 0 times and has no effect.'],
+    ['', ''],
+    ['mov eax, 4', 'Loads sys_write syscall number.'],
+    ['mov ebx, 1', 'Target is STDOUT.'],
+    ['mov ecx, s2', 'Points ECX at the lowercase result buffer.'],
+    ['mov edx, 20', 'Specifies 20 bytes to print.'],
+    ['int 80h', 'Executes sys_write — prints the lowercase string.'],
+    ['', ''],
+    ['mov eax, 1', 'Loads sys_exit syscall number.'],
+    ['mov ebx, 0', 'Exit status 0.'],
+    ['int 80h', 'Terminates the program.'],
+  ]),
+  sim: {
+    type: 'register',
+    desc: 'Type an uppercase string and watch LODSB → OR 0x20 → STOSB convert each character to lowercase, one step at a time.',
+    interactive: 'caseconvert-debugger'
+  },
+  quiz: [
+    { q: 'What does LODSB do?', opts: ['Stores AL to [EDI]','Loads [ESI] into AL and increments ESI','Compares two strings','Loops ECX times'], correct: 1 },
+    { q: "Why does 'or al, 0x20' convert a letter to lowercase?", opts: ['It adds 32 using arithmetic','It sets bit 5, which is the bit that differs between upper and lower ASCII letters','It clears all bits','It only works for vowels'], correct: 1 },
+    { q: 'What does STOSB do?', opts: ['Loads a byte from memory','Stores AL into [EDI] and increments EDI','Subtracts AL from EDI','Stops the loop'], correct: 1 },
+    { q: 'What keeps the "UpptoLow" loop running?', opts: ['The carry flag','LOOP decrementing ECX until it reaches 0','An infinite loop with no exit','The direction flag'], correct: 1 },
+  ]
+},
+
+/* =================== EXP 9 — CHARACTER SEARCH =================== */
+{
+  id: 'char-search',
+  num: '09',
+  title: 'Character Search in a String',
+  category: 'String Manipulation',
+  icon: '🔍',
+  aim: 'Write an ASM program to search for a particular character in a given string using the SCASB instruction and display whether it was found.',
+  theory: [
+    { t: 'SCASB instruction', d: 'Compares AL against the byte at [EDI], sets flags accordingly, and increments EDI — used to scan through memory looking for a specific value.' },
+    { t: 'REPNE prefix', d: 'REPNE (repeat while not equal) repeats SCASB until either a match is found (ZF=1) or ECX reaches 0 — perfect for "find this byte" searches.' },
+    { t: 'JE after REPNE SCASB', d: 'If the scan stopped because a match was found, the Zero Flag is set, so a JE (jump if equal/ZF=1) branch right after detects success.' },
+    { t: 'Null-terminated strings', d: "Strings ending in db '...',0 use a 0 byte as a terminator, similar to C strings — useful for knowing where a string ends." },
+  ],
+  components: [
+    { icon: '🔢', name: 'AL', value: '8-bit', desc: 'Holds the character being searched for, set before the scan begins.' },
+    { icon: '🧭', name: 'EDI', value: 'pointer', desc: 'Scans forward through the string, byte by byte, during SCASB.' },
+    { icon: '⚙️', name: 'REPNE SCASB', value: 'Instruction', desc: 'Repeats the byte-compare until a match is found or the counter hits zero.' },
+    { icon: '🚩', name: 'Zero Flag (ZF)', value: 'flag', desc: 'Set to 1 the moment a matching byte is found by SCASB.' },
+  ],
+  procedure: [
+    "Define the string my_string db 'hello world',0 and compute its length.",
+    "Set AL to the search character, e.g. 'p', and EDI to point at my_string.",
+    'Execute CLD then REPNE SCASB to scan for the character.',
+    'Use JE to branch to a "found" label if the Zero Flag was set; otherwise fall through to "not found".',
+    'Print the corresponding message and exit.',
+  ],
+  code: codeLines([
+    ['section .data', 'Initialized strings for the search target and result messages.'],
+    [`my_string db 'hello world',0`, 'The string to search through, null-terminated.'],
+    ['len equ $-my_string', 'Length of the search string.'],
+    [`msg_found db 'found!',0xa`, 'Message printed if the character is located.'],
+    ['len_found equ $-msg_found', 'Length of the found message.'],
+    [`msg_notfound db 'not found!'`, 'Message printed if the character is not located.'],
+    ['len_notfound equ $-msg_notfound', 'Length of the not-found message.'],
+    ['', ''],
+    ['section .text', 'Code segment.'],
+    ['global _start', 'Entry point exported.'],
+    ['_start:', 'Execution begins here.'],
+    ['mov ecx, len', 'Sets ECX to the maximum number of bytes to scan.'],
+    ['mov edi, my_string', 'Points EDI at the start of the string to search.'],
+    [`mov al, 'p'`, "Sets AL to the character being searched for — here, 'p'."],
+    ['cld', 'Clears the direction flag so EDI advances forward during the scan.'],
+    ['repne scasb', "Repeatedly compares AL to [EDI] and advances EDI, stopping early if a match is found (ZF=1) or ECX hits 0."],
+    ['je found', 'If the Zero Flag is set (a match was found), jump to the found label.'],
+    ['mov eax, 4', 'Otherwise: loads sys_write syscall number for the not-found message.'],
+    ['mov ebx, 1', 'Target is STDOUT.'],
+    ['mov ecx, msg_notfound', 'Points ECX at the not-found message.'],
+    ['mov edx, len_notfound', 'Length of the not-found message.'],
+    ['int 80h', 'Prints "not found!".'],
+    ['jmp exit', 'Skips over the found-branch and jumps straight to exit.'],
+    ['', ''],
+    ['found:', 'Label reached only when the character was located.'],
+    ['mov eax, 4', 'Loads sys_write syscall number.'],
+    ['mov ebx, 1', 'Target is STDOUT.'],
+    ['mov ecx, msg_found', 'Points ECX at the found message.'],
+    ['mov edx, len_found', 'Length of the found message.'],
+    ['int 80h', 'Prints "found!".'],
+    ['', ''],
+    ['exit:', 'Common exit point for both branches.'],
+    ['mov eax, 1', 'Loads sys_exit syscall number.'],
+    ['mov ebx, 0', 'Exit status 0.'],
+    ['int 80h', 'Terminates the program.'],
+  ]),
+  sim: {
+    type: 'register',
+    desc: 'Type a string and a character to search for — watch EDI scan forward byte-by-byte until a match is found or the string ends.',
+    interactive: 'search-debugger'
+  },
+  quiz: [
+    { q: 'What does SCASB compare?', opts: ['[ESI] against [EDI]','AL against the byte at [EDI]','ECX against zero','Two memory addresses'], correct: 1 },
+    { q: 'What does REPNE mean as a prefix?', opts: ['Repeat exactly N times','Repeat while not equal (until a match or counter hits 0)','Repeat forever','Repeat while equal'], correct: 1 },
+    { q: 'After REPNE SCASB finds a match, what is the Zero Flag?', opts: ['0','1','Unchanged','It depends on ECX'], correct: 1 },
+    { q: "Searching 'hello world' for the character 'p': is it found?", opts: ['Yes','No'], correct: 1 },
+  ]
+},
+
+/* =================== EXP 10 — STRING COMPARE =================== */
+{
+  id: 'string-compare',
+  num: '10',
+  title: 'Comparing Two Strings',
+  category: 'String Manipulation',
+  icon: '🔁',
+  aim: 'Write an ASM program to compare two strings using the CMPSB instruction and display whether the strings are equal.',
+  theory: [
+    { t: 'CMPSB instruction', d: 'Compares the byte at [ESI] with the byte at [EDI], sets flags based on the difference, then increments both ESI and EDI.' },
+    { t: 'REPE prefix', d: 'REPE (repeat while equal) repeats CMPSB as long as the compared bytes keep matching and ECX has not reached 0.' },
+    { t: 'JECXZ instruction', d: 'Jumps to a label if ECX is exactly zero — used here to detect that REPE CMPSB compared every byte successfully without finding a mismatch.' },
+    { t: 'Detecting inequality', d: 'If REPE CMPSB stops early (mismatch found), ECX will be nonzero when the loop ends, so JECXZ will NOT jump — falling through to the "not equal" branch.' },
+  ],
+  components: [
+    { icon: '🧭', name: 'ESI / EDI', value: 'pointers', desc: 'Point at string 1 and string 2 respectively; both advance together during the compare.' },
+    { icon: '🔢', name: 'ECX', value: 'counter', desc: 'Maximum number of bytes to compare; doubles as the "all matched" indicator when checked with JECXZ.' },
+    { icon: '⚙️', name: 'REPE CMPSB', value: 'Instruction', desc: 'Repeats the byte-by-byte comparison while bytes are equal and ECX > 0.' },
+    { icon: '🚩', name: 'JECXZ', value: 'Instruction', desc: 'Jumps to the "equal" branch only if ECX reached exactly zero (meaning no mismatch interrupted the scan).' },
+  ],
+  procedure: [
+    "Define two strings s1 and s2 (e.g. both 'Hello, world!') and compute lens2 from the shorter/reference string.",
+    'Set ESI to s1, EDI to s2, and ECX to the length to compare.',
+    'Execute CLD then REPE CMPSB to compare byte by byte.',
+    'Use JECXZ to branch to the "equal" label if all bytes matched (ECX hit 0); otherwise fall through to "not equal".',
+    'Print the corresponding result message and exit.',
+  ],
+  code: codeLines([
+    ['section .data', 'Initialized strings and result messages.'],
+    [`s1 db 'Hello, world!',0`, 'First string to compare.'],
+    ['lens1 equ $-s1', 'Length of the first string.'],
+    [`s2 db 'Hello, world!',0`, 'Second string to compare.'],
+    ['lens2 equ $-s2', 'Length of the second string.'],
+    [`msg_eq db 'Strings are equal!',0xa`, 'Message shown if the strings match.'],
+    ['len_eq equ $-msg_eq', 'Length of the equal message.'],
+    [`msg_neq db 'Strings are not equal!'`, 'Message shown if the strings differ.'],
+    ['len_neq equ $-msg_neq', 'Length of the not-equal message.'],
+    ['', ''],
+    ['section .text', 'Code segment.'],
+    ['global _start', 'Entry point exported for the linker.'],
+    ['_start:', 'Execution begins here.'],
+    ['mov esi, s1', 'Points ESI at the first string.'],
+    ['mov edi, s2', 'Points EDI at the second string.'],
+    ['mov ecx, lens2', 'Sets the comparison length based on string 2.'],
+    ['cld', 'Clears the direction flag so ESI/EDI advance forward.'],
+    ['repe cmpsb', 'Repeatedly compares [ESI] with [EDI], advancing both, while bytes match and ECX > 0.'],
+    ['jecxz equal', 'If ECX reached exactly 0 (every byte matched with none left over), jump to the equal label.'],
+    ['', ''],
+    ['mov eax, 4', 'Otherwise: loads sys_write syscall number for the not-equal message.'],
+    ['mov ebx, 1', 'Target is STDOUT.'],
+    ['mov ecx, msg_neq', 'Points ECX at the not-equal message.'],
+    ['mov edx, len_neq', 'Length of the not-equal message.'],
+    ['int 80h', 'Prints "Strings are not equal!".'],
+    ['jmp exit', 'Skips the equal branch and jumps to the common exit point.'],
+    ['', ''],
+    ['equal:', 'Label reached only when every compared byte matched.'],
+    ['mov eax, 4', 'Loads sys_write syscall number.'],
+    ['mov ebx, 1', 'Target is STDOUT.'],
+    ['mov ecx, msg_eq', 'Points ECX at the equal message.'],
+    ['mov edx, len_eq', 'Length of the equal message.'],
+    ['int 80h', 'Prints "Strings are equal!".'],
+    ['', ''],
+    ['exit:', 'Common exit point for both branches.'],
+    ['mov eax, 1', 'Loads sys_exit syscall number.'],
+    ['mov ebx, 0', 'Exit status 0.'],
+    ['int 80h', 'Terminates the program.'],
+  ]),
+  sim: {
+    type: 'register',
+    desc: 'Type two strings and watch REPE CMPSB compare them byte by byte, stopping early at the first mismatch (if any).',
+    interactive: 'compare-debugger'
+  },
+  quiz: [
+    { q: 'What does CMPSB compare?', opts: ['Two register values','The byte at [ESI] with the byte at [EDI]','ECX with zero','AL with AH'], correct: 1 },
+    { q: 'What does REPE mean as a prefix to CMPSB?', opts: ['Repeat exactly once','Repeat while the compared bytes are equal and ECX > 0','Repeat while not equal','Repeat 10 times'], correct: 1 },
+    { q: 'What does JECXZ check?', opts: ['Whether ECX is zero','Whether the carry flag is set','Whether ESI equals EDI','Whether AL is zero'], correct: 0 },
+    { q: 'If two strings differ at the very first character, what happens to REPE CMPSB?', opts: ['It still compares all characters','It stops immediately after the first mismatch','It crashes the program','It sets the direction flag'], correct: 1 },
+  ]
+}
+
+);
+
+/* ===================================================================
+   ASM VIRTUAL LAB — Simulators
+   Builds the step-by-step register/IO debugger for each experiment.
+   =================================================================== */
+
+function initSimulation(exp) {
+  const container = document.getElementById(`sim-container-${exp.id}`);
+  if (!container) return;
+
+  if (exp.sim.interactive === 'add-debugger') return buildArithDebugger(container, exp, 'add');
+  if (exp.sim.interactive === 'sub-debugger') return buildArithDebugger(container, exp, 'sub');
+  if (exp.sim.interactive === 'mul-debugger') return buildArithDebugger(container, exp, 'mul');
+  if (exp.sim.interactive === 'div-debugger') return buildArithDebugger(container, exp, 'div');
+  if (exp.sim.interactive === 'array-debugger') return buildArrayDebugger(container, exp);
+  if (exp.sim.interactive === 'strcopy-debugger') return buildStrCopyDebugger(container, exp);
+  if (exp.sim.interactive === 'caseconvert-debugger') return buildCaseConvertDebugger(container, exp);
+  if (exp.sim.interactive === 'search-debugger') return buildSearchDebugger(container, exp);
+  if (exp.sim.interactive === 'compare-debugger') return buildCompareDebugger(container, exp);
+  if (exp.sim.interactive === 'name-roll') return buildNameRollSim(container, exp);
+  if (exp.sim.steps) return buildScriptedStepper(container, exp);
+}
+
+/* helper: render register grid */
+function regGridHTML(regs, flashKeys) {
+  flashKeys = flashKeys || [];
+  return Object.entries(regs).map(([name, val]) => {
+    const flash = flashKeys.includes(name) ? 'flash' : '';
+    let hex = '';
+    const num = parseInt(val);
+    if (!isNaN(num) && /^-?\d+$/.test(String(val))) hex = `<span class="hex mono">0x${(num & 0xFF).toString(16).toUpperCase().padStart(2,'0')}</span>`;
+    return `<div class="reg-cell ${flash}"><div class="reg-name">${name}</div><div class="reg-val mono">${val}${hex}</div></div>`;
+  }).join('');
+}
+
+/* =================================================================
+   SCRIPTED STEPPER (Hello World — fixed step sequence)
+   ================================================================= */
+function buildScriptedStepper(container, exp) {
+  let stepIdx = 0;
+  const steps = exp.sim.steps;
+
+  function render() {
+    const s = steps[stepIdx];
+    container.innerHTML = `
+      <div class="sim-controls">
+        <button class="sim-btn" onclick="window.__simPrev()" ${stepIdx===0?'disabled':''}>⏮ Previous</button>
+        <button class="sim-btn primary" onclick="window.__simNext()" ${stepIdx===steps.length-1?'disabled':''}>Step Forward ▶</button>
+        <button class="sim-btn" onclick="window.__simReset()">↺ Reset</button>
+      </div>
+      <div class="sim-step-indicator">Step <b>${stepIdx+1}</b> / ${steps.length} — ${s.note}</div>
+      <div class="sim-grid">
+        <div class="reg-panel">
+          <div class="reg-panel-title">Registers</div>
+          <div class="reg-grid">${regGridHTML(s.regs, s.active ? [s.active] : [])}</div>
+        </div>
+        <div>
+          <div class="reg-panel-title" style="margin-bottom:10px;">Console Output</div>
+          <div class="console-panel">${s.console ? s.console.replace(/\n/g,'<br>') : '<span class="ph">// waiting for output...</span>'}</div>
+        </div>
+      </div>
+    `;
+  }
+  window.__simNext = () => { if (stepIdx < steps.length-1) { stepIdx++; render(); } };
+  window.__simPrev = () => { if (stepIdx > 0) { stepIdx--; render(); } };
+  window.__simReset = () => { stepIdx = 0; render(); };
+  render();
+}
+
+/* =================================================================
+   ARITHMETIC DEBUGGERS — Add / Sub / Mul / Div
+   ================================================================= */
+function buildArithDebugger(container, exp, op) {
+  const cfg = {
+    add: { label1:'AL (1st operand)', label2:'BL (2nd operand)', sym:'+', instr:'add al, bl', max1:255, max2:255 },
+    sub: { label1:'AL (minuend)', label2:'BL (subtrahend)', sym:'−', instr:'sub al, bl', max1:255, max2:255 },
+    mul: { label1:'AL (1st operand)', label2:'BL (2nd operand)', sym:'×', instr:'mul bl', max1:255, max2:255 },
+    div: { label1:'AL (dividend)', label2:'BL (divisor)', sym:'÷', instr:'div bl', max1:255, max2:255, minB:1 },
+  }[op];
+
+  let stepIdx = 0;
+  let a = 25, b = 10;
+  let steps = [];
+
+  function toHexByte(n) { return '0x' + (n & 0xFF).toString(16).toUpperCase().padStart(2,'0'); }
+  function toHexWord(n) { return '0x' + (n & 0xFFFF).toString(16).toUpperCase().padStart(4,'0'); }
+
+  function buildSteps() {
+    steps = [];
+    if (op === 'add') {
+      const res = a + b;
+      const al = res & 0xFF;
+      const cf = res > 255;
+      steps = [
+        { regs:{AL:'0',BL:'0',CF:cf?'?':'0'}, active:null, note:'Initial state — registers cleared.', flags:{CF:false} },
+        { regs:{AL:String(a),BL:'0',CF:'0'}, active:'AL', note:`mov al, ${a} → AL loaded with first operand.`, flags:{CF:false} },
+        { regs:{AL:String(a),BL:String(b),CF:'0'}, active:'BL', note:`mov bl, ${b} → BL loaded with second operand.`, flags:{CF:false} },
+        { regs:{AL:String(al),BL:String(b),CF:cf?'1':'0'}, active:'AL', note:`add al, bl → AL = ${a} + ${b} = ${res}${cf?` (wraps to ${al}, CF set — unsigned overflow!)`:''}`, flags:{CF:cf} },
+      ];
+    } else if (op === 'sub') {
+      const res = a - b;
+      const al = ((res % 256) + 256) % 256;
+      const cf = res < 0;
+      steps = [
+        { regs:{AL:'0',BL:'0',CF:'0'}, active:null, note:'Initial state — registers cleared.', flags:{CF:false} },
+        { regs:{AL:String(a),BL:'0',CF:'0'}, active:'AL', note:`mov al, ${a} → AL loaded with minuend.`, flags:{CF:false} },
+        { regs:{AL:String(a),BL:String(b),CF:'0'}, active:'BL', note:`mov bl, ${b} → BL loaded with subtrahend.`, flags:{CF:false} },
+        { regs:{AL:String(al),BL:String(b),CF:cf?'1':'0'}, active:'AL', note:`sub al, bl → AL = ${a} − ${b} = ${res}${cf?` (borrow! wraps to ${al}, CF set)`:''}`, flags:{CF:cf} },
+      ];
+    } else if (op === 'mul') {
+      const res = a * b;
+      const ax = res & 0xFFFF;
+      const al = ax & 0xFF;
+      const ah = (ax >> 8) & 0xFF;
+      steps = [
+        { regs:{AL:'0',BL:'0',AX:'0x0000'}, active:null, note:'Initial state — registers cleared.', flags:{} },
+        { regs:{AL:String(a),BL:'0',AX:toHexWord(a)}, active:'AL', note:`mov al, ${a} → AL loaded with first operand.`, flags:{} },
+        { regs:{AL:String(a),BL:String(b),AX:toHexWord(a)}, active:'BL', note:`mov bl, ${b} → BL loaded with second operand.`, flags:{} },
+        { regs:{AL:String(al),BL:String(b),AX:toHexWord(ax)}, active:'AX', note:`mul bl → AX = AL × BL = ${a} × ${b} = ${res} (${toHexWord(ax)}). AL=${al}, AH=${ah}.`, flags:{} },
+      ];
+    } else if (op === 'div') {
+      if (b === 0) {
+        steps = [
+          { regs:{AL:'0',BL:'0',AH:'0'}, active:null, note:'Initial state.', flags:{} },
+          { regs:{AL:String(a),BL:'0',AH:'0'}, active:'AL', note:`mov al, ${a} → AL loaded with dividend.`, flags:{} },
+          { regs:{AL:String(a),BL:'0',AH:'0'}, active:'BL', note:`mov bl, 0 → BL loaded with divisor (zero!).`, flags:{} },
+          { regs:{AL:'⚠ FAULT',BL:'0',AH:'⚠'}, active:'AL', note:`div bl → DIVIDE-BY-ZERO EXCEPTION (#DE). The CPU halts execution — never divide by an unchecked value!`, flags:{} },
+        ];
+      } else {
+        const q = Math.floor(a / b);
+        const r = a % b;
+        steps = [
+          { regs:{AL:'0',BL:'0',AH:'0'}, active:null, note:'Initial state — registers cleared.', flags:{} },
+          { regs:{AL:String(a),BL:'0',AH:'0'}, active:'AL', note:`mov al, ${a} → AL loaded with dividend.`, flags:{} },
+          { regs:{AL:String(a),BL:String(b),AH:'0'}, active:'BL', note:`mov bl, ${b} → BL loaded with divisor.`, flags:{} },
+          { regs:{AL:String(q),BL:String(b),AH:String(r)}, active:'AH', note:`div bl → AX(${a}) ÷ BL(${b}) → quotient AL=${q}, remainder AH=${r}.`, flags:{} },
+        ];
+      }
+    }
+  }
+
+  function render() {
+    buildSteps();
+    if (stepIdx >= steps.length) stepIdx = steps.length - 1;
+    const s = steps[stepIdx];
+    const flagsHTML = s.flags && Object.keys(s.flags).length
+      ? `<div class="flags-row">${Object.entries(s.flags).map(([k,v]) => `<div class="flag-chip ${v?'set':''}">${k}=${v?1:0}</div>`).join('')}</div>`
+      : '';
+
+    container.innerHTML = `
+      <div class="sim-input-row">
+        <div class="sim-input-group">
+          <label>${cfg.label1}</label>
+          <input type="number" min="0" max="${cfg.max1}" value="${a}" id="arith-a-${exp.id}" onchange="window['__arithUpdate_${exp.id}']()"/>
+        </div>
+        <div class="sim-op">${cfg.sym}</div>
+        <div class="sim-input-group">
+          <label>${cfg.label2}</label>
+          <input type="number" min="${cfg.minB||0}" max="${cfg.max2}" value="${b}" id="arith-b-${exp.id}" onchange="window['__arithUpdate_${exp.id}']()"/>
+        </div>
+      </div>
+
+      <div class="sim-controls">
+        <button class="sim-btn" onclick="window['__arithPrev_${exp.id}']()" ${stepIdx===0?'disabled':''}>⏮ Previous</button>
+        <button class="sim-btn primary" onclick="window['__arithNext_${exp.id}']()" ${stepIdx===steps.length-1?'disabled':''}>Step Forward ▶</button>
+        <button class="sim-btn" onclick="window['__arithReset_${exp.id}']()">↺ Reset</button>
+      </div>
+      <div class="sim-step-indicator">Step <b>${stepIdx+1}</b> / ${steps.length} &nbsp;·&nbsp; instruction: <span class="mono" style="color:var(--accent)">${cfg.instr}</span></div>
+
+      <div class="reg-panel">
+        <div class="reg-panel-title">CPU Registers</div>
+        <div class="reg-grid">${regGridHTML(s.regs, s.active ? [s.active] : [])}</div>
+        ${flagsHTML}
+      </div>
+      <div class="console-panel" style="margin-top:14px;">${s.note}</div>
+    `;
+  }
+
+  window[`__arithUpdate_${exp.id}`] = () => {
+    a = parseInt(document.getElementById(`arith-a-${exp.id}`).value) || 0;
+    b = parseInt(document.getElementById(`arith-b-${exp.id}`).value) || 0;
+    a = Math.max(0, Math.min(255, a));
+    b = Math.max(op==='div'?1:0, Math.min(255, b));
+    stepIdx = 0;
+    render();
+  };
+  window[`__arithNext_${exp.id}`] = () => { if (stepIdx < steps.length-1) { stepIdx++; render(); } };
+  window[`__arithPrev_${exp.id}`] = () => { if (stepIdx > 0) { stepIdx--; render(); } };
+  window[`__arithReset_${exp.id}`] = () => { stepIdx = 0; render(); };
+
+  render();
+}
+
+/* =================================================================
+   ARRAY SUM DEBUGGER
+   ================================================================= */
+function buildArrayDebugger(container, exp) {
+  let arr = [1,2,3,4];
+  let stepIdx = 0;
+  let steps = [];
+
+  function buildSteps() {
+    steps = [];
+    let ebx = 0, ecx = 0, eax = arr.length;
+    steps.push({ EAX:String(eax), EBX:String(ebx), ECX:`x[${ecx}]`, active:null, note:`Initial: EAX=${eax} (counter), EBX=0 (accumulator), ECX→x[0].` });
+    for (let i = 0; i < arr.length; i++) {
+      ebx += arr[i];
+      steps.push({ EAX:String(eax), EBX:String(ebx), ECX:`x[${i}]`, active:'EBX', note:`add ebx,[ecx] → EBX += x[${i}] (${arr[i]}) → EBX = ${ebx}` });
+      ecx++;
+      steps.push({ EAX:String(eax), EBX:String(ebx), ECX: i+1<arr.length?`x[${i+1}]`:'x[end]', active:'ECX', note:`add ecx,1 → pointer advances to next element.` });
+      eax--;
+      steps.push({ EAX:String(eax), EBX:String(ebx), ECX: i+1<arr.length?`x[${i+1}]`:'x[end]', active:'EAX', note:`dec eax → counter = ${eax}. ${eax!==0?'jnz t → loop continues.':'jnz t → EAX=0, loop ends.'}` });
+    }
+    steps.push({ EAX:String(eax), EBX:String(ebx), ECX:'—', active:'EBX', note:`Final sum in EBX = ${ebx}. Ready for ASCII conversion and printing.` });
+  }
+
+  function render() {
+    buildSteps();
+    if (stepIdx >= steps.length) stepIdx = steps.length - 1;
+    const s = steps[stepIdx];
+    container.innerHTML = `
+      <div class="sim-input-row">
+        <div class="sim-input-group" style="flex:3;">
+          <label>Array elements (comma-separated, 0–255 each)</label>
+          <input type="text" value="${arr.join(',')}" id="arr-input-${exp.id}" onchange="window['__arrUpdate_${exp.id}']()" style="text-align:left;font-size:14px;"/>
+        </div>
+      </div>
+      <div class="sim-controls">
+        <button class="sim-btn" onclick="window['__arrPrev_${exp.id}']()" ${stepIdx===0?'disabled':''}>⏮ Previous</button>
+        <button class="sim-btn primary" onclick="window['__arrNext_${exp.id}']()" ${stepIdx===steps.length-1?'disabled':''}>Step Forward ▶</button>
+        <button class="sim-btn" onclick="window['__arrReset_${exp.id}']()">↺ Reset</button>
+      </div>
+      <div class="sim-step-indicator">Step <b>${stepIdx+1}</b> / ${steps.length}</div>
+      <div class="reg-panel">
+        <div class="reg-panel-title">CPU Registers</div>
+        <div class="reg-grid">${regGridHTML({EAX:s.EAX, EBX:s.EBX, ECX:s.ECX}, s.active?[s.active]:[])}</div>
+      </div>
+      <div class="console-panel" style="margin-top:14px;">${s.note}</div>
+    `;
+  }
+
+  window[`__arrUpdate_${exp.id}`] = () => {
+    const raw = document.getElementById(`arr-input-${exp.id}`).value;
+    const parsed = raw.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x) && x>=0 && x<=255);
+    arr = parsed.length ? parsed : [1,2,3,4];
+    stepIdx = 0; render();
+  };
+  window[`__arrNext_${exp.id}`] = () => { if (stepIdx < steps.length-1) { stepIdx++; render(); } };
+  window[`__arrPrev_${exp.id}`] = () => { if (stepIdx > 0) { stepIdx--; render(); } };
+  window[`__arrReset_${exp.id}`] = () => { stepIdx = 0; render(); };
+
+  render();
+}
+
+/* =================================================================
+   STRING COPY DEBUGGER (MOVSB)
+   ================================================================= */
+function buildStrCopyDebugger(container, exp) {
+  let src = 'Hello!';
+  let stepIdx = 0;
+  let steps = [];
+
+  function buildSteps() {
+    steps = [];
+    let dest = '';
+    steps.push({ ESI:'src[0]', EDI:'dst[0]', ECX:String(src.length), active:null, note:`Initial: ECX=${src.length} (length), ESI→source start, EDI→destination start.`, dest });
+    for (let i = 0; i < src.length; i++) {
+      dest += src[i];
+      steps.push({
+        ESI: i+1<src.length ? `src[${i+1}]` : 'src[end]',
+        EDI: i+1<src.length ? `dst[${i+1}]` : 'dst[end]',
+        ECX: String(src.length - i - 1),
+        active: 'EDI',
+        note: `rep movsb (iteration ${i+1}) → copy '${src[i]}' from [ESI] to [EDI], both pointers advance, ECX decrements to ${src.length-i-1}.`,
+        dest
+      });
+    }
+    steps.push({ ESI:'src[end]', EDI:'dst[end]', ECX:'0', active:null, note:`ECX = 0 → REP MOVSB stops. Destination buffer now holds a full copy of the source string.`, dest });
+  }
+
+  function render() {
+    buildSteps();
+    if (stepIdx >= steps.length) stepIdx = steps.length - 1;
+    const s = steps[stepIdx];
+    container.innerHTML = `
+      <div class="sim-input-row">
+        <div class="sim-input-group" style="flex:3;">
+          <label>Source string (s1)</label>
+          <input type="text" value="${src}" id="strcopy-input-${exp.id}" maxlength="16" onchange="window['__strcopyUpdate_${exp.id}']()" style="text-align:left;font-size:14px;"/>
+        </div>
+      </div>
+      <div class="sim-controls">
+        <button class="sim-btn" onclick="window['__strcopyPrev_${exp.id}']()" ${stepIdx===0?'disabled':''}>⏮ Previous</button>
+        <button class="sim-btn primary" onclick="window['__strcopyNext_${exp.id}']()" ${stepIdx===steps.length-1?'disabled':''}>Step Forward ▶</button>
+        <button class="sim-btn" onclick="window['__strcopyReset_${exp.id}']()">↺ Reset</button>
+      </div>
+      <div class="sim-step-indicator">Step <b>${stepIdx+1}</b> / ${steps.length}</div>
+      <div class="reg-panel">
+        <div class="reg-panel-title">CPU Registers</div>
+        <div class="reg-grid">${regGridHTML({ESI:s.ESI, EDI:s.EDI, ECX:s.ECX}, s.active?[s.active]:[])}</div>
+      </div>
+      <div class="console-panel" style="margin-top:14px;">${s.note}<br><br><span class="ph">destination buffer (s2):</span> "${s.dest}${'_'.repeat(Math.max(0,src.length-s.dest.length))}"</div>
+    `;
+  }
+
+  window[`__strcopyUpdate_${exp.id}`] = () => {
+    const v = document.getElementById(`strcopy-input-${exp.id}`).value;
+    src = v.length ? v : 'Hello!';
+    stepIdx = 0; render();
+  };
+  window[`__strcopyNext_${exp.id}`] = () => { if (stepIdx < steps.length-1) { stepIdx++; render(); } };
+  window[`__strcopyPrev_${exp.id}`] = () => { if (stepIdx > 0) { stepIdx--; render(); } };
+  window[`__strcopyReset_${exp.id}`] = () => { stepIdx = 0; render(); };
+
+  render();
+}
+
+/* =================================================================
+   CASE CONVERT DEBUGGER (LODSB / OR / STOSB)
+   ================================================================= */
+function buildCaseConvertDebugger(container, exp) {
+  let src = 'VOYAGER31';
+  let stepIdx = 0;
+  let steps = [];
+
+  function buildSteps() {
+    steps = [];
+    let dest = '';
+    steps.push({ AL:'—', ESI:'src[0]', EDI:'dst[0]', active:null, note:`Initial: ECX=${src.length}, ESI→source, EDI→destination.`, dest });
+    for (let i = 0; i < src.length; i++) {
+      const ch = src[i];
+      steps.push({ AL:`'${ch}'`, ESI:`src[${i+1}]`, EDI:`dst[${i}]`, active:'AL', note:`lodsb → AL = '${ch}' (loaded from [ESI]), ESI advances.` });
+      const lower = ch.toLowerCase();
+      steps.push({ AL:`'${lower}'`, ESI:`src[${i+1}]`, EDI:`dst[${i}]`, active:'AL', note:`or al, 0x20 → bit 5 set → AL = '${lower}' (forced lowercase).` });
+      dest += lower;
+      steps.push({ AL:`'${lower}'`, ESI:`src[${i+1}]`, EDI:`dst[${i+1}]`, active:'EDI', note:`stosb → '${lower}' written to [EDI], EDI advances. Loop back if more characters remain.`, dest });
+    }
+    steps.push({ AL:'—', ESI:'src[end]', EDI:'dst[end]', active:null, note:`Loop complete. Destination buffer now holds the fully lowercase string.`, dest });
+  }
+
+  function render() {
+    buildSteps();
+    if (stepIdx >= steps.length) stepIdx = steps.length - 1;
+    const s = steps[stepIdx];
+    container.innerHTML = `
+      <div class="sim-input-row">
+        <div class="sim-input-group" style="flex:3;">
+          <label>Source string (s1) — try uppercase</label>
+          <input type="text" value="${src}" id="case-input-${exp.id}" maxlength="16" onchange="window['__caseUpdate_${exp.id}']()" style="text-align:left;font-size:14px;"/>
+        </div>
+      </div>
+      <div class="sim-controls">
+        <button class="sim-btn" onclick="window['__casePrev_${exp.id}']()" ${stepIdx===0?'disabled':''}>⏮ Previous</button>
+        <button class="sim-btn primary" onclick="window['__caseNext_${exp.id}']()" ${stepIdx===steps.length-1?'disabled':''}>Step Forward ▶</button>
+        <button class="sim-btn" onclick="window['__caseReset_${exp.id}']()">↺ Reset</button>
+      </div>
+      <div class="sim-step-indicator">Step <b>${stepIdx+1}</b> / ${steps.length}</div>
+      <div class="reg-panel">
+        <div class="reg-panel-title">CPU Registers</div>
+        <div class="reg-grid">${regGridHTML({AL:s.AL, ESI:s.ESI, EDI:s.EDI}, s.active?[s.active]:[])}</div>
+      </div>
+      <div class="console-panel" style="margin-top:14px;">${s.note}<br><br><span class="ph">destination buffer (s2):</span> "${s.dest}"</div>
+    `;
+  }
+
+  window[`__caseUpdate_${exp.id}`] = () => {
+    const v = document.getElementById(`case-input-${exp.id}`).value;
+    src = v.length ? v : 'VOYAGER31';
+    stepIdx = 0; render();
+  };
+  window[`__caseNext_${exp.id}`] = () => { if (stepIdx < steps.length-1) { stepIdx++; render(); } };
+  window[`__casePrev_${exp.id}`] = () => { if (stepIdx > 0) { stepIdx--; render(); } };
+  window[`__caseReset_${exp.id}`] = () => { stepIdx = 0; render(); };
+
+  render();
+}
+
+/* =================================================================
+   CHARACTER SEARCH DEBUGGER (SCASB)
+   ================================================================= */
+function buildSearchDebugger(container, exp) {
+  let str = 'hello world';
+  let target = 'o';
+  let stepIdx = 0;
+  let steps = [];
+
+  function buildSteps() {
+    steps = [];
+    let found = false;
+    steps.push({ AL:`'${target}'`, EDI:'str[0]', ECX:String(str.length), active:null, note:`Initial: AL='${target}' (search char), EDI→string start, ECX=${str.length}.` });
+    for (let i = 0; i < str.length; i++) {
+      const match = str[i] === target;
+      steps.push({
+        AL:`'${target}'`, EDI:`str[${i}]→'${str[i]}'`, ECX:String(str.length-i-1), active:'EDI',
+        note: match
+          ? `scasb compares AL('${target}') with [EDI]('${str[i]}') at index ${i} → MATCH! ZF=1. repne stops scanning.`
+          : `scasb compares AL('${target}') with [EDI]('${str[i]}') at index ${i} → no match, ZF=0. EDI advances, ECX→${str.length-i-1}.`
+      });
+      if (match) { found = true; break; }
+    }
+    steps.push({
+      AL:`'${target}'`, EDI: found ? 'match found' : 'str[end]', ECX: found ? '—' : '0', active: null,
+      note: found ? `je found → Zero Flag was set, so the program jumps to print "found!"` : `Zero Flag never set → falls through to print "not found!"`
+    });
+  }
+
+  function render() {
+    buildSteps();
+    if (stepIdx >= steps.length) stepIdx = steps.length - 1;
+    const s = steps[stepIdx];
+    container.innerHTML = `
+      <div class="sim-input-row">
+        <div class="sim-input-group" style="flex:3;">
+          <label>String to search</label>
+          <input type="text" value="${str}" id="search-str-${exp.id}" maxlength="20" onchange="window['__searchUpdate_${exp.id}']()" style="text-align:left;font-size:14px;"/>
+        </div>
+        <div class="sim-input-group">
+          <label>Character</label>
+          <input type="text" value="${target}" id="search-char-${exp.id}" maxlength="1" onchange="window['__searchUpdate_${exp.id}']()"/>
+        </div>
+      </div>
+      <div class="sim-controls">
+        <button class="sim-btn" onclick="window['__searchPrev_${exp.id}']()" ${stepIdx===0?'disabled':''}>⏮ Previous</button>
+        <button class="sim-btn primary" onclick="window['__searchNext_${exp.id}']()" ${stepIdx===steps.length-1?'disabled':''}>Step Forward ▶</button>
+        <button class="sim-btn" onclick="window['__searchReset_${exp.id}']()">↺ Reset</button>
+      </div>
+      <div class="sim-step-indicator">Step <b>${stepIdx+1}</b> / ${steps.length}</div>
+      <div class="reg-panel">
+        <div class="reg-panel-title">CPU Registers</div>
+        <div class="reg-grid">${regGridHTML({AL:s.AL, EDI:s.EDI, ECX:s.ECX}, s.active?[s.active]:[])}</div>
+      </div>
+      <div class="console-panel" style="margin-top:14px;">${s.note}</div>
+    `;
+  }
+
+  window[`__searchUpdate_${exp.id}`] = () => {
+    const sv = document.getElementById(`search-str-${exp.id}`).value;
+    const cv = document.getElementById(`search-char-${exp.id}`).value;
+    str = sv.length ? sv : 'hello world';
+    target = cv.length ? cv[0] : 'o';
+    stepIdx = 0; render();
+  };
+  window[`__searchNext_${exp.id}`] = () => { if (stepIdx < steps.length-1) { stepIdx++; render(); } };
+  window[`__searchPrev_${exp.id}`] = () => { if (stepIdx > 0) { stepIdx--; render(); } };
+  window[`__searchReset_${exp.id}`] = () => { stepIdx = 0; render(); };
+
+  render();
+}
+
+/* =================================================================
+   STRING COMPARE DEBUGGER (CMPSB)
+   ================================================================= */
+function buildCompareDebugger(container, exp) {
+  let s1 = 'hello';
+  let s2 = 'hello';
+  let stepIdx = 0;
+  let steps = [];
+
+  function buildSteps() {
+    steps = [];
+    const len = Math.max(s1.length, s2.length);
+    let mismatchAt = -1;
+    for (let i = 0; i < len; i++) {
+      if (s1[i] !== s2[i]) { mismatchAt = i; break; }
+    }
+    steps.push({ ESI:'s1[0]', EDI:'s2[0]', ECX:String(len), active:null, note:`Initial: ESI→s1, EDI→s2, ECX=${len}.` });
+    for (let i = 0; i < len; i++) {
+      const c1 = s1[i] || '∅', c2 = s2[i] || '∅';
+      const eq = c1 === c2;
+      steps.push({
+        ESI:`s1[${i}]→'${c1}'`, EDI:`s2[${i}]→'${c2}'`, ECX:String(len-i-1), active:'ESI',
+        note: eq
+          ? `cmpsb compares '${c1}' with '${c2}' → equal. ECX decrements to ${len-i-1}, repe continues.`
+          : `cmpsb compares '${c1}' with '${c2}' → MISMATCH! repe stops here — ECX is now ${len-i-1} (not zero).`
+      });
+      if (!eq) break;
+    }
+    const allEqual = mismatchAt === -1;
+    steps.push({
+      ESI:'—', EDI:'—', ECX: allEqual ? '0' : String(len - (mismatchAt+1)), active:null,
+      note: allEqual
+        ? `jecxz equal → ECX reached exactly 0, meaning every byte matched. Prints "Strings are equal!"`
+        : `jecxz equal → ECX is non-zero (mismatch interrupted the scan). Falls through to print "Strings are not equal!"`
+    });
+  }
+
+  function render() {
+    buildSteps();
+    if (stepIdx >= steps.length) stepIdx = steps.length - 1;
+    const s = steps[stepIdx];
+    container.innerHTML = `
+      <div class="sim-input-row">
+        <div class="sim-input-group">
+          <label>String 1 (s1)</label>
+          <input type="text" value="${s1}" id="cmp-s1-${exp.id}" maxlength="14" onchange="window['__cmpUpdate_${exp.id}']()" style="text-align:left;font-size:14px;"/>
+        </div>
+        <div class="sim-input-group">
+          <label>String 2 (s2)</label>
+          <input type="text" value="${s2}" id="cmp-s2-${exp.id}" maxlength="14" onchange="window['__cmpUpdate_${exp.id}']()" style="text-align:left;font-size:14px;"/>
+        </div>
+      </div>
+      <div class="sim-controls">
+        <button class="sim-btn" onclick="window['__cmpPrev_${exp.id}']()" ${stepIdx===0?'disabled':''}>⏮ Previous</button>
+        <button class="sim-btn primary" onclick="window['__cmpNext_${exp.id}']()" ${stepIdx===steps.length-1?'disabled':''}>Step Forward ▶</button>
+        <button class="sim-btn" onclick="window['__cmpReset_${exp.id}']()">↺ Reset</button>
+      </div>
+      <div class="sim-step-indicator">Step <b>${stepIdx+1}</b> / ${steps.length}</div>
+      <div class="reg-panel">
+        <div class="reg-panel-title">CPU Registers</div>
+        <div class="reg-grid">${regGridHTML({ESI:s.ESI, EDI:s.EDI, ECX:s.ECX}, s.active?[s.active]:[])}</div>
+      </div>
+      <div class="console-panel" style="margin-top:14px;">${s.note}</div>
+    `;
+  }
+
+  window[`__cmpUpdate_${exp.id}`] = () => {
+    const v1 = document.getElementById(`cmp-s1-${exp.id}`).value;
+    const v2 = document.getElementById(`cmp-s2-${exp.id}`).value;
+    s1 = v1.length ? v1 : 'hello';
+    s2 = v2.length ? v2 : 'hello';
+    stepIdx = 0; render();
+  };
+  window[`__cmpNext_${exp.id}`] = () => { if (stepIdx < steps.length-1) { stepIdx++; render(); } };
+  window[`__cmpPrev_${exp.id}`] = () => { if (stepIdx > 0) { stepIdx--; render(); } };
+  window[`__cmpReset_${exp.id}`] = () => { stepIdx = 0; render(); };
+
+  render();
+}
+
+/* =================================================================
+   NAME & ROLL NUMBER INTERACTIVE I/O SIM (Macro ALP)
+   ================================================================= */
+function buildNameRollSim(container, exp) {
+  let stage = 0; // 0=prompt name, 1=prompt roll, 2=done
+  let name = '', roll = '';
+
+  function render() {
+    let consoleHTML = '';
+    if (stage === 0) {
+      consoleHTML = `<span class="ph">Enter your Name</span>`;
+    } else if (stage === 1) {
+      consoleHTML = `Enter your Name<br>${name}<br><span class="ph">Enter your roll no.</span>`;
+    } else {
+      consoleHTML = `Enter your Name<br>${name}<br>Enter your roll no.<br>${roll}<br>Entered name &amp; roll no. is<br>${name}<br>${roll}<br><span class="ph">[process exited, code 0]</span>`;
+    }
+
+    container.innerHTML = `
+      <div class="reg-panel" style="margin-bottom:16px;">
+        <div class="reg-panel-title">Simulated Terminal (stdin / stdout)</div>
+        <div class="console-panel" style="min-height:120px;">${consoleHTML}</div>
+      </div>
+      ${stage < 2 ? `
+        <div class="sim-input-row">
+          <div class="sim-input-group" style="flex:3;">
+            <label>${stage===0 ? 'Type your name and press Enter' : 'Type your roll number and press Enter'}</label>
+            <input type="text" id="nr-input-${exp.id}" style="text-align:left;font-size:14px;" placeholder="${stage===0?'e.g. Yug Thakur':'e.g. SY11-204'}"/>
+          </div>
+        </div>
+        <div class="sim-controls">
+          <button class="sim-btn primary" onclick="window['__nrSubmit_${exp.id}']()">↵ Submit (rw 3,0,buf,10)</button>
+        </div>
+      ` : `
+        <div class="sim-controls"><button class="sim-btn" onclick="window['__nrReset_${exp.id}']()">↺ Restart Simulation</button></div>
+      `}
+      <div class="hint-row">Each submission simulates <span class="k">rw 3,0,buffer,10</span> — a sys_read call reading keyboard input into a buffer.</div>
+    `;
+  }
+
+  window[`__nrSubmit_${exp.id}`] = () => {
+    const val = document.getElementById(`nr-input-${exp.id}`).value.trim() || (stage===0?'Student':'000');
+    if (stage === 0) { name = val; stage = 1; }
+    else if (stage === 1) { roll = val; stage = 2; }
+    render();
+  };
+  window[`__nrReset_${exp.id}`] = () => { stage = 0; name=''; roll=''; render(); };
+
+  render();
+}
+
+/* ===================================================================
+   ASM VIRTUAL LAB — App Logic
+   =================================================================== */
+
+let currentExp = null;
+let currentSectionIdx = 0;
+let quizState = {}; // per-experiment quiz answers
+let loggedInRoll = 'Student';
+
+/* ---------------- THEME ---------------- */
+const THEME_ICON_IDS = ['theme-icon-login', 'theme-icon', 'theme-icon-2', 'theme-icon-3'];
+const THEME_LABEL_IDS = ['theme-label-login', 'theme-label', 'theme-label-2', 'theme-label-3'];
+const THEME_BTN_IDS = ['theme-toggle-btn-login', 'theme-toggle-btn', 'theme-toggle-btn-2', 'theme-toggle-btn-3'];
+
+function initTheme() {
+  const saved = 'light'; // default per brief
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeLabel();
+  THEME_BTN_IDS.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.onclick = toggleTheme;
+  });
+}
+function toggleTheme() {
+  const html = document.documentElement;
+  const cur = html.getAttribute('data-theme');
+  const next = cur === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  updateThemeLabel();
+}
+function updateThemeLabel() {
+  const t = document.documentElement.getAttribute('data-theme');
+  THEME_ICON_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = t === 'light' ? '🌙' : '☀️'; });
+  THEME_LABEL_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = t === 'light' ? 'Dark' : 'Light'; });
+}
+
+/* ---------------- PROFILE DROPDOWN ---------------- */
+function toggleProfileMenu(id) {
+  const el = document.getElementById(id);
+  const wasOpen = el.classList.contains('open');
+  closeProfileMenus();
+  if (!wasOpen) el.classList.add('open');
+}
+function closeProfileMenus() {
+  document.querySelectorAll('.nav-profile.open').forEach(el => el.classList.remove('open'));
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nav-profile')) closeProfileMenus();
+});
+
+function syncUserDisplay(roll) {
+  loggedInRoll = roll;
+  const initial = roll[0].toUpperCase();
+  ['nav-avatar', 'nav-avatar-2', 'nav-avatar-3', 'nav-avatar-menu-1', 'nav-avatar-menu-2', 'profile-avatar-big'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = initial;
+  });
+  ['nav-user-name', 'npm-name-1', 'npm-name-2', 'profile-name-big'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = roll;
+  });
+}
+
+function openProfile() {
+  closeProfileMenus();
+  renderProfilePage();
+  switchPage('profile-page');
+}
+
+function renderProfilePage() {
+  const totalExp = EXPERIMENTS.length;
+  const completed = EXPERIMENTS.filter(e => getProgress(e.id).pct === 100).length;
+  const inProgress = EXPERIMENTS.filter(e => { const p = getProgress(e.id).pct; return p > 0 && p < 100; }).length;
+
+  let totalScorePct = 0, quizCount = 0;
+  EXPERIMENTS.forEach(e => {
+    const st = quizState[e.id];
+    if (st && Object.keys(st.answered).length === e.quiz.length) {
+      totalScorePct += (st.score / e.quiz.length) * 100;
+      quizCount++;
+    }
+  });
+  const avgQuiz = quizCount ? Math.round(totalScorePct / quizCount) : 0;
+
+  document.getElementById('profile-stat-done').textContent = completed;
+  document.getElementById('profile-stat-progress').textContent = inProgress;
+  document.getElementById('profile-stat-quiz').textContent = avgQuiz + '%';
+  document.getElementById('profile-stat-total').textContent = totalExp;
+
+  const list = document.getElementById('profile-progress-list');
+  list.innerHTML = EXPERIMENTS.map(exp => {
+    const pct = getProgress(exp.id).pct;
+    return `
+      <div class="profile-row">
+        <div class="pr-left">
+          <div class="pr-icon">${exp.icon}</div>
+          <div>
+            <div class="pr-title">EXP ${exp.num} · ${exp.title}</div>
+            <div class="pr-sub">${exp.category}</div>
+          </div>
+        </div>
+        <div class="pr-pct">${pct}%</div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ---------------- AUTH: REGISTER + LOGIN ---------------- */
+/* This is a standalone HTML file the student downloads and opens
+   directly in their own browser, so accounts are persisted with
+   localStorage (scoped to this file/origin on their machine).
+   Passwords are never stored in plaintext — a salted SHA-256 hash
+   is stored instead of the raw password. */
+
+const ACCOUNTS_KEY = 'asmlab_accounts_v1';
+
+function loadAccounts() {
+  try {
+    const raw = localStorage.getItem(ACCOUNTS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+function saveAccounts(accounts) {
+  try {
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function normalizeRoll(roll) {
+  return roll.trim().toUpperCase().replace(/\s+/g, '');
+}
+
+async function hashPassword(password, salt) {
+  const input = salt + ':' + password;
+  if (window.crypto && window.crypto.subtle && window.crypto.subtle.digest) {
+    try {
+      const enc = new TextEncoder().encode(input);
+      const buf = await window.crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) {
+      // fall through to the simple fallback below
+    }
+  }
+  // Fallback hash (used only if Web Crypto is unavailable in this context) —
+  // not cryptographically strong, but still avoids storing plaintext passwords.
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');
+}
+
+function randomSalt() {
+  if (window.crypto && window.crypto.getRandomValues) {
+    const arr = new Uint8Array(16);
+    window.crypto.getRandomValues(arr);
+    return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  // Fallback salt source if Web Crypto's getRandomValues is unavailable.
+  let s = '';
+  for (let i = 0; i < 32; i++) s += Math.floor(Math.random() * 16).toString(16);
+  return s;
+}
+
+function showAuthView(view) {
+  document.getElementById('auth-signin').classList.toggle('active', view === 'signin');
+  document.getElementById('auth-signup').classList.toggle('active', view === 'signup');
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('signup-error').style.display = 'none';
+  document.getElementById('login-success-msg').style.display = 'none';
+}
+
+function togglePassVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const showing = input.type === 'text';
+  input.type = showing ? 'password' : 'text';
+  btn.textContent = showing ? 'show' : 'hide';
+}
+
+async function doSignup() {
+  const name = document.getElementById('signup-name').value.trim();
+  const rollRaw = document.getElementById('signup-roll').value.trim();
+  const pass = document.getElementById('signup-pass').value;
+  const confirm = document.getElementById('signup-pass-confirm').value;
+
+  if (!name) return showSignupError('Please enter your full name.');
+  if (!rollRaw) return showSignupError('Please enter your roll number.');
+  if (pass.length < 6) return showSignupError('Password must be at least 6 characters.');
+  if (pass !== confirm) return showSignupError('Passwords do not match.');
+
+  const roll = normalizeRoll(rollRaw);
+  const accounts = loadAccounts();
+
+  if (accounts[roll]) {
+    return showSignupError('An account with this roll number already exists. Try signing in instead.');
+  }
+
+  const salt = randomSalt();
+  const passHash = await hashPassword(pass, salt);
+  accounts[roll] = { name, roll: rollRaw, salt, passHash, createdAt: Date.now() };
+
+  if (!saveAccounts(accounts)) {
+    return showSignupError('Could not create your account on this device/browser. Please try again.');
+  }
+
+  document.getElementById('signup-name').value = '';
+  document.getElementById('signup-roll').value = '';
+  document.getElementById('signup-pass').value = '';
+  document.getElementById('signup-pass-confirm').value = '';
+  showAuthView('signin');
+  document.getElementById('roll-input').value = rollRaw;
+  document.getElementById('login-success-msg').textContent = 'Account created — sign in with your new password.';
+  document.getElementById('login-success-msg').style.display = 'block';
+}
+
+function showSignupError(msg) {
+  const err = document.getElementById('signup-error');
+  err.textContent = msg;
+  err.style.display = 'block';
+}
+
+async function doLogin() {
+  const rollRaw = document.getElementById('roll-input').value.trim();
+  const pass = document.getElementById('pass-input').value;
+  err.style.display = 'none';
+
+  if (!rollRaw) { err.textContent = 'Please enter your roll number.'; err.style.display = 'block'; return; }
+  if (!pass) { err.textContent = 'Please enter your password.'; err.style.display = 'block'; return; }
+
+  const roll = normalizeRoll(rollRaw);
+  const accounts = loadAccounts();
+  const account = accounts[roll];
+
+  if (!account) {
+    err.textContent = 'No account found for this roll number. Create one below.';
+    err.style.display = 'block';
+    return;
+  }
+
+  const attemptHash = await hashPassword(pass, account.salt);
+  if (attemptHash !== account.passHash) {
+    err.textContent = 'Incorrect password. Please try again.';
+    err.style.display = 'block';
+    return;
+  }
+
+  document.getElementById('login-success-msg').style.display = 'none';
+  syncUserDisplay(account.name);
+  switchPage('dashboard-page');
+  renderDashboard();
+}
+
+function doLogout() {
+  closeProfileMenus();
+  showAuthView('signin');
+  switchPage('login-page');
+  document.getElementById('roll-input').value = '';
+  document.getElementById('pass-input').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('login-success-msg').style.display = 'none';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const loginPage = document.getElementById('login-page');
+    if (!loginPage || !loginPage.classList.contains('active')) return;
+    if (document.getElementById('auth-signup').classList.contains('active')) doSignup();
+    else doLogin();
+  }
+});
+
+/* ---------------- PAGE SWITCHING ---------------- */
+function switchPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  document.getElementById('nav-back-btn').style.display = pageId === 'workspace-page' ? 'flex' : 'none';
+}
+
+/* ---------------- DASHBOARD RENDER ---------------- */
+function renderDashboard() {
+  const grid = document.getElementById('exp-grid');
+  grid.innerHTML = '';
+  EXPERIMENTS.forEach((exp, i) => {
+    const progress = getProgress(exp.id);
+    const card = document.createElement('div');
+    card.className = 'exp-card';
+    card.onclick = () => openExperiment(exp.id);
+    const badge = progress.pct === 100
+      ? `<span class="exp-badge badge-done">Completed</span>`
+      : progress.pct > 0
+        ? `<span class="exp-badge badge-progress">In Progress</span>`
+        : `<span class="exp-badge badge-new">Start</span>`;
+    card.innerHTML = `
+      <div class="exp-top">
+        <span class="exp-num mono">EXP ${exp.num}</span>
+        ${badge}
+      </div>
+      <div class="exp-icon">${exp.icon}</div>
+      <div class="exp-title">${exp.title}</div>
+      <div class="exp-desc">${exp.category} · ${exp.aim.slice(0, 80)}${exp.aim.length > 80 ? '…' : ''}</div>
+      <div class="exp-foot">
+        <div class="exp-progress-bar"><div class="exp-progress-fill" style="width:${progress.pct}%"></div></div>
+        <span class="mono">${progress.pct}%</span>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // stats
+  const totalExp = EXPERIMENTS.length;
+  const completed = EXPERIMENTS.filter(e => getProgress(e.id).pct === 100).length;
+  document.getElementById('stat-total').textContent = totalExp;
+  document.getElementById('stat-done').textContent = completed;
+  document.getElementById('stat-sections').textContent = SECTIONS.length;
+  document.getElementById('stat-arch').textContent = '32-bit';
+}
+
+/* ---------------- PROGRESS TRACKING (in-memory) ---------------- */
+const progressStore = {};
+function getProgress(expId) {
+  if (!progressStore[expId]) progressStore[expId] = { sections: {} };
+  const done = Object.values(progressStore[expId].sections).filter(Boolean).length;
+  const pct = Math.round((done / SECTIONS.length) * 100);
+  return { sections: progressStore[expId].sections, pct };
+}
+function markSectionVisited(expId, sectionKey) {
+  if (!progressStore[expId]) progressStore[expId] = { sections: {} };
+  progressStore[expId].sections[sectionKey] = true;
+}
+
+/* ---------------- OPEN EXPERIMENT WORKSPACE ---------------- */
+function openExperiment(expId) {
+  currentExp = EXPERIMENTS.find(e => e.id === expId);
+  currentSectionIdx = 0;
+  switchPage('workspace-page');
+  renderWorkspaceShell();
+  showSection('aim');
+}
+
+function renderWorkspaceShell() {
+  const exp = currentExp;
+  document.getElementById('ws-title').textContent = exp.title;
+  document.getElementById('ws-sub').innerHTML = `Experiment ${exp.num} &nbsp;·&nbsp; ${exp.category}`;
+
+  const sidebar = document.getElementById('ws-sidebar-list');
+  sidebar.innerHTML = '';
+  SECTIONS.forEach((sec, i) => {
+    const item = document.createElement('div');
+    item.className = 'sb-item';
+    item.id = `sb-${sec.key}`;
+    item.onclick = () => showSection(sec.key);
+    item.innerHTML = `
+      <div class="sb-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="sb-name">${sec.label}</div>
+    `;
+    sidebar.appendChild(item);
+  });
+
+  renderProgressCard();
+
+  // build all section panels fresh
+  const main = document.getElementById('ws-main');
+  main.innerHTML = SECTIONS.map(s => `<div class="sec-panel" id="panel-${s.key}"></div>`).join('');
+  SECTIONS.forEach(s => renderSectionContent(s.key));
+}
+
+function renderProgressCard() {
+  const prog = getProgress(currentExp.id);
+  document.getElementById('ws-progress-fill').style.width = prog.pct + '%';
+  document.getElementById('ws-progress-pct').innerHTML = `${prog.pct}% <span>complete</span>`;
+}
+
+function showSection(key) {
+  currentSectionIdx = SECTIONS.findIndex(s => s.key === key);
+  document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
+  document.getElementById(`sb-${key}`).classList.add('active');
+  document.querySelectorAll('.sec-panel').forEach(el => el.classList.remove('active'));
+  document.getElementById(`panel-${key}`).classList.add('active');
+  markSectionVisited(currentExp.id, key);
+  renderProgressCard();
+  renderDashboardSilently(); // keep dashboard cards fresh if revisited
+  window.scrollTo({top: 0, behavior: 'instant'});
+}
+
+function renderDashboardSilently() {
+  // cheap: only re-render if dashboard grid exists & is populated
+  const grid = document.getElementById('exp-grid');
+  if (grid && grid.children.length) renderDashboard();
+}
+
+function goToSectionOffset(offset) {
+  const newIdx = currentSectionIdx + offset;
+  if (newIdx < 0 || newIdx >= SECTIONS.length) return;
+  showSection(SECTIONS[newIdx].key);
+}
+
+/* ---------------- SECTION CONTENT RENDERERS ---------------- */
+function renderSectionContent(key) {
+  const exp = currentExp;
+  const panel = document.getElementById(`panel-${key}`);
+  let html = '';
+
+  if (key === 'aim') {
+    html = `
+      <div class="content-card">
+        <div class="cc-eyebrow">Section 01</div>
+        <div class="cc-title">Aim</div>
+        <div class="aim-box"><span class="ic">🎯</span><span>${exp.aim}</span></div>
+      </div>
+      ${footNav(key)}
+    `;
+  }
+
+  else if (key === 'theory') {
+    html = `
+      <div class="content-card">
+        <div class="cc-eyebrow">Section 02</div>
+        <div class="cc-title">Theory</div>
+        <div class="cc-text">Background concepts needed to understand this experiment's code.</div>
+        <div class="kp-grid">
+          ${exp.theory.map(k => `<div class="kp"><div class="kp-t">${k.t}</div><div class="kp-d">${k.d}</div></div>`).join('')}
+        </div>
+      </div>
+      ${footNav(key)}
+    `;
+  }
+
+  else if (key === 'components') {
+    html = `
+      <div class="content-card">
+        <div class="cc-eyebrow">Section 03</div>
+        <div class="cc-title">Components Used</div>
+        <table class="comp-table">
+          <tr><th>Icon</th><th>Component</th><th>Type</th><th>Description</th></tr>
+          ${exp.components.map(c => `
+            <tr>
+              <td><div class="comp-icon-cell">${c.icon}</div></td>
+              <td><span class="reg-pill">${c.name}</span></td>
+              <td>${c.value}</td>
+              <td style="color:var(--text-dim);font-size:13px;">${c.desc}</td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+      ${footNav(key)}
+    `;
+  }
+
+  else if (key === 'procedure') {
+    html = `
+      <div class="content-card">
+        <div class="cc-eyebrow">Section 04</div>
+        <div class="cc-title">Procedure</div>
+        <div class="proc-list">
+          ${exp.procedure.map((p,i) => `
+            <div class="proc-step">
+              <div class="proc-num">${i+1}</div>
+              <div class="proc-text">${p}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="content-card">
+        <div class="cc-eyebrow">Annotated Source — click any line</div>
+        <div class="cc-title" style="font-size:16px;">Click a line of code to see exactly what it does</div>
+        <div class="code-card">
+          <div class="code-card-head">
+            <div class="cc-dots"><div class="cc-dot r"></div><div class="cc-dot y"></div><div class="cc-dot g"></div></div>
+            <div class="cc-fname">${exp.id}.asm</div>
+          </div>
+          <div class="code-lines" id="codeLines-${exp.id}">
+            ${exp.code.map((l, i) => `
+              <div class="code-line" data-idx="${i}" onclick="selectCodeLine('${exp.id}', ${i})">
+                <div class="cl-num mono">${i+1}</div>
+                <div class="cl-code">${l.html || '&nbsp;'}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="line-explain-box" id="line-explain-${exp.id}"></div>
+        <div class="hint-row"><span class="k">click</span> any line above to see a plain-English explanation of what it does</div>
+      </div>
+      ${footNav(key)}
+    `;
+  }
+
+  else if (key === 'simulation') {
+    html = `
+      <div class="content-card">
+        <div class="cc-eyebrow">Section 05</div>
+        <div class="cc-title">Simulation — Step-by-Step Execution</div>
+        <div class="cc-text" style="margin-bottom:18px;">${exp.sim.desc}</div>
+        <div id="sim-container-${exp.id}"></div>
+      </div>
+      ${footNav(key)}
+    `;
+  }
+
+  else if (key === 'observations') {
+    html = `
+      <div class="content-card">
+        <div class="cc-eyebrow">Section 06</div>
+        <div class="cc-title">Observations</div>
+        <div class="cc-text">Record what you observed while running the simulation. Try at least 3 different input combinations.</div>
+        <div class="obs-table-wrap">
+          <table class="obs-input-table" id="obs-table-${exp.id}">
+            <tr><th>#</th><th>Input(s)</th><th>Result</th><th>Notes</th></tr>
+            ${[1,2,3].map(n => `
+              <tr>
+                <td style="text-align:center;font-family:'JetBrains Mono',monospace;">${n}</td>
+                <td><input placeholder="e.g. AL=10, BL=5"/></td>
+                <td><input placeholder="e.g. AL=15"/></td>
+                <td><input placeholder="optional notes"/></td>
+              </tr>
+            `).join('')}
+          </table>
+        </div>
+        <div class="obs-note"><span>✅</span><span>These notes stay only in this session — they're a scratchpad for your lab record, not auto-saved.</span></div>
+      </div>
+      ${footNav(key)}
+    `;
+  }
+
+  else if (key === 'quiz') {
+    html = `
+      <div class="content-card">
+        <div class="cc-eyebrow">Section 07</div>
+        <div class="cc-title">Knowledge Check</div>
+        <div id="quiz-body-${exp.id}"></div>
+      </div>
+      ${footNav(key, true)}
+    `;
+  }
+
+  panel.innerHTML = html;
+
+  // post-render hooks for interactive bits
+  if (key === 'simulation') initSimulation(exp);
+  if (key === 'quiz') initQuiz(exp);
+}
+
+function footNav(key, isLast) {
+  const idx = SECTIONS.findIndex(s => s.key === key);
+  const prevDisabled = idx === 0 ? 'disabled' : '';
+  const isFinalSection = idx === SECTIONS.length - 1;
+  return `
+    <div class="sec-foot-nav">
+      <button class="fn-btn" ${prevDisabled} onclick="goToSectionOffset(-1)">← Previous</button>
+      ${isFinalSection
+        ? `<button class="fn-btn next" onclick="switchPage('dashboard-page'); renderDashboard();">Back to Dashboard ✓</button>`
+        : `<button class="fn-btn next" onclick="goToSectionOffset(1)">Next →</button>`
+      }
+    </div>
+  `;
+}
+
+/* ---------------- CODE LINE EXPLAIN ---------------- */
+function selectCodeLine(expId, idx) {
+  const exp = EXPERIMENTS.find(e => e.id === expId);
+  const line = exp.code[idx];
+  document.querySelectorAll(`#codeLines-${expId} .code-line`).forEach(el => el.classList.remove('selected'));
+  document.querySelector(`#codeLines-${expId} .code-line[data-idx="${idx}"]`).classList.add('selected');
+  const box = document.getElementById(`line-explain-${expId}`);
+  if (!line.explain) {
+    box.classList.remove('show');
+    return;
+  }
+  box.innerHTML = `<div class="le-line mono">Line ${idx+1}: ${line.code}</div><div>${line.explain}</div>`;
+  box.classList.add('show');
+}
+
+/* ---------------- QUIZ ---------------- */
+function initQuiz(exp) {
+  const body = document.getElementById(`quiz-body-${exp.id}`);
+  if (!quizState[exp.id]) quizState[exp.id] = { answered: {}, score: 0 };
+  renderQuiz(exp);
+}
+
+function renderQuiz(exp) {
+  const state = quizState[exp.id];
+  const body = document.getElementById(`quiz-body-${exp.id}`);
+  const allAnswered = Object.keys(state.answered).length === exp.quiz.length;
+
+  let html = exp.quiz.map((q, qi) => {
+    const answered = state.answered[qi];
+    const opts = q.opts.map((opt, oi) => {
+      let cls = 'quiz-opt';
+      if (answered !== undefined) {
+        cls += ' disabled';
+        if (oi === q.correct) cls += ' correct';
+        else if (oi === answered) cls += ' wrong';
+      }
+      return `
+        <div class="${cls}" onclick="answerQuiz('${exp.id}', ${qi}, ${oi})">
+          <div class="opt-letter">${String.fromCharCode(65+oi)}</div>
+          <div>${opt}</div>
+        </div>
+      `;
+    }).join('');
+    return `
+      <div class="quiz-q">
+        <div class="quiz-qtext"><span class="quiz-qnum mono">Q${qi+1}.</span><span>${q.q}</span></div>
+        <div class="quiz-opts">${opts}</div>
+      </div>
+    `;
+  }).join('');
+
+  if (allAnswered) {
+    const pct = Math.round((state.score / exp.quiz.length) * 100);
+    html += `
+      <div class="quiz-score-box show">
+        <div class="quiz-score-num">${state.score}/${exp.quiz.length}</div>
+        <div class="quiz-score-label">${pct}% correct — ${pct >= 75 ? 'great work!' : 'review the theory section and try again.'}</div>
+        <button class="quiz-retry" onclick="resetQuiz('${exp.id}')">↻ Retry Quiz</button>
+      </div>
+    `;
+  }
+
+  body.innerHTML = html;
+}
+
+function answerQuiz(expId, qi, oi) {
+  const exp = EXPERIMENTS.find(e => e.id === expId);
+  const state = quizState[expId];
+  if (state.answered[qi] !== undefined) return;
+  state.answered[qi] = oi;
+  if (oi === exp.quiz[qi].correct) state.score++;
+  renderQuiz(exp);
+}
+
+function resetQuiz(expId) {
+  quizState[expId] = { answered: {}, score: 0 };
+  renderQuiz(EXPERIMENTS.find(e => e.id === expId));
+}
+
+
+
+/* ---------------- BACKEND API CONNECTOR ----------------
+   When the project is run with `npm start`, login/register/progress are saved
+   in data/db.json. Open through http://localhost:3000, not by double-clicking index.html. */
+let apiToken = localStorage.getItem('asmlab_api_token') || '';
+let apiAvailable = location.protocol !== 'file:';
+let saveTimer = null;
+
+async function apiFetch(path, options = {}) {
+  const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+  if (apiToken) headers.Authorization = 'Bearer ' + apiToken;
+  const res = await fetch(path, Object.assign({}, options, { headers }));
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok || data.ok === false) throw new Error(data.message || 'Request failed');
+  return data;
+}
+
+function loadServerProgress(payload) {
+  if (!payload) return;
+  Object.keys(progressStore).forEach(k => delete progressStore[k]);
+  Object.assign(progressStore, payload.progressStore || {});
+  quizState = payload.quizState || {};
+  renderDashboardSilently();
+  if (currentExp) renderProgressCard();
+}
+
+function saveProgressToBackend() {
+  if (!apiAvailable || !apiToken) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    apiFetch('/api/progress', {
+      method: 'POST',
+      body: JSON.stringify({ progressStore, quizState })
+    }).catch(() => {});
+  }, 250);
+}
+
+async function doSignup() {
+  if (!apiAvailable) return showSignupError('Backend is not running. Start it with npm install and npm start, then open http://localhost:3000');
+  const name = document.getElementById('signup-name').value.trim();
+  const rollRaw = document.getElementById('signup-roll').value.trim();
+  const pass = document.getElementById('signup-pass').value;
+  const confirm = document.getElementById('signup-pass-confirm').value;
+
+  if (!name) return showSignupError('Please enter your full name.');
+  if (!rollRaw) return showSignupError('Please enter your roll number.');
+  if (pass.length < 6) return showSignupError('Password must be at least 6 characters.');
+  if (pass !== confirm) return showSignupError('Passwords do not match.');
+
+  try {
+    await apiFetch('/api/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, roll: rollRaw, password: pass })
+    });
+    document.getElementById('signup-name').value = '';
+    document.getElementById('signup-roll').value = '';
+    document.getElementById('signup-pass').value = '';
+    document.getElementById('signup-pass-confirm').value = '';
+    showAuthView('signin');
+    document.getElementById('roll-input').value = rollRaw;
+    document.getElementById('login-success-msg').textContent = 'Account created — sign in with your new password.';
+    document.getElementById('login-success-msg').style.display = 'block';
+  } catch (err) {
+    showSignupError(err.message || 'Could not create account.');
+  }
+}
+
+async function doLogin() {
+  const err = document.getElementById('login-error');
+  if (!apiAvailable) { err.textContent = 'Backend is not running. Start it with npm install and npm start, then open http://localhost:3000'; err.style.display = 'block'; return; }
+  const rollRaw = document.getElementById('roll-input').value.trim();
+  const pass = document.getElementById('pass-input').value;
+  err.style.display = 'none';
+
+  if (!rollRaw) { err.textContent = 'Please enter your roll number.'; err.style.display = 'block'; return; }
+  if (!pass) { err.textContent = 'Please enter your password.'; err.style.display = 'block'; return; }
+
+  try {
+    const data = await apiFetch('/api/login', {
+      method: 'POST',
+      body: JSON.stringify({ roll: rollRaw, password: pass })
+    });
+    apiToken = data.token;
+    localStorage.setItem('asmlab_api_token', apiToken);
+    syncUserDisplay(data.user.name || data.user.roll || rollRaw);
+    loadServerProgress(data.progress);
+    switchPage('dashboard-page');
+    renderDashboard();
+  } catch (e) {
+    err.textContent = e.message || 'Login failed. Please try again.';
+    err.style.display = 'block';
+  }
+}
+
+async function doLogout() {
+  if (apiAvailable && apiToken) {
+    try { await apiFetch('/api/logout', { method: 'POST', body: '{}' }); } catch (e) {}
+  }
+  apiToken = '';
+  localStorage.removeItem('asmlab_api_token');
+  closeProfileMenus();
+  showAuthView('signin');
+  switchPage('login-page');
+  document.getElementById('roll-input').value = '';
+  document.getElementById('pass-input').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('login-success-msg').style.display = 'none';
+}
+
+
+function getProgress(expId) {
+  if (!progressStore[expId]) progressStore[expId] = { sections: {} };
+  const done = Object.values(progressStore[expId].sections).filter(Boolean).length;
+  const pct = Math.round((done / SECTIONS.length) * 100);
+  return { sections: progressStore[expId].sections, pct };
+}
+
+function markSectionVisited(expId, sectionKey) {
+  if (!progressStore[expId]) progressStore[expId] = { sections: {} };
+  progressStore[expId].sections[sectionKey] = true;
+  saveProgressToBackend();
+}
+
+function answerQuiz(expId, qi, oi) {
+  const exp = EXPERIMENTS.find(e => e.id === expId);
+  if (!quizState[expId]) quizState[expId] = { answered: {}, score: 0 };
+  const state = quizState[expId];
+  if (state.answered[qi] !== undefined) return;
+  state.answered[qi] = oi;
+  if (oi === exp.quiz[qi].correct) state.score++;
+  renderQuiz(exp);
+  saveProgressToBackend();
+}
+
+function resetQuiz(expId) {
+  quizState[expId] = { answered: {}, score: 0 };
+  renderQuiz(EXPERIMENTS.find(e => e.id === expId));
+  saveProgressToBackend();
+}
+
+async function apiBootstrapSession() {
+  if (!apiAvailable || !apiToken) return;
+  try {
+    const data = await apiFetch('/api/me');
+    syncUserDisplay(data.user.name || data.user.roll || 'Student');
+    loadServerProgress(data.progress);
+    switchPage('dashboard-page');
+    renderDashboard();
+  } catch (e) {
+    apiToken = '';
+    localStorage.removeItem('asmlab_api_token');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', apiBootstrapSession);
+
+/* ---------------- INIT ---------------- */
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  document.getElementById('theme-toggle-btn').onclick = toggleTheme;
+  renderDashboard();
+
+  // live "roll number already registered" hint while signing up
+  const signupRollInput = document.getElementById('signup-roll');
+  const hint = document.getElementById('signup-roll-hint');
+  if (signupRollInput && hint) {
+    signupRollInput.addEventListener('input', () => {
+      const val = signupRollInput.value.trim();
+      if (!val) { hint.textContent = ''; hint.className = 'field-hint'; return; }
+      const accounts = loadAccounts();
+      if (accounts[normalizeRoll(val)]) {
+        hint.textContent = 'This roll number is already registered.';
+        hint.className = 'field-hint error';
+      } else {
+        hint.textContent = 'Available.';
+        hint.className = 'field-hint ok';
+      }
+    });
+  }
+});
+
+
+</script>
+</body>
+</html>

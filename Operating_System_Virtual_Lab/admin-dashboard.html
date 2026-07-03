@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Dashboard</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<nav>
+
+<h2>Admin Dashboard</h2>
+
+<button id="themeToggle">
+🌙 Dark
+</button>
+
+</nav>
+
+<div class="dashboard">
+
+<!-- Sidebar -->
+
+<ul>
+
+<li>🏠 Dashboard</li>
+
+<li>👨‍🎓 Students</li>
+
+<li>👨‍🏫 Teachers</li>
+
+<li>📚 Algorithms</li>
+
+<li>📊 Reports</li>
+
+<li>📢 Announcements</li>
+
+<li>⚙ Settings</li>
+
+<li>
+
+<a href="login.html">
+
+🚪 Logout
+
+</a>
+
+</li>
+
+</ul>
+
+<!-- Main -->
+
+<div class="main">
+
+<h1>Welcome Admin 👨‍💼</h1>
+
+<!-- Profile -->
+
+<div class="profile-card">
+
+<h2>Administrator Profile</h2>
+
+<p><strong>Name :</strong>
+<span id="userName">Guest</span>
+</p>
+
+<p><strong>Role :</strong> Admin</p>
+
+<p><strong>Department :</strong> System Administration</p>
+
+<p><strong>Experience :</strong> 10 Years</p>
+
+<p>
+
+<strong>Time :</strong>
+
+<span id="clock">
+
+00:00:00
+
+</span>
+
+</p>
+
+</div>
+
+<!-- Statistics -->
+
+<div class="stats">
+
+<div class="stat-card">
+
+<h2>120</h2>
+
+<p>Total Students</p>
+
+</div>
+
+<div class="stat-card">
+
+<h2>15</h2>
+
+<p>Total Teachers</p>
+
+</div>
+
+<div class="stat-card">
+
+<h2>10</h2>
+
+<p>Algorithms</p>
+
+</div>
+
+<div class="stat-card">
+
+<h2>150</h2>
+
+<p>Reports</p>
+
+</div>
+
+</div>
+
+<!-- Search -->
+
+<div class="input-card">
+
+<h2>Search User</h2>
+
+<input
+type="text"
+id="searchUser"
+placeholder="🔍 Search Student / Teacher">
+
+</div>
+
+<!-- Student Management -->
+
+<div class="progress-card">
+
+<h2>Student Management</h2>
+
+<table id="studentTable">
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Name</th>
+
+<th>Role</th>
+
+<th>Status</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>101</td>
+
+<td>Yug</td>
+
+<td>Student</td>
+
+<td style="color:#22c55e;">Active</td>
+
+</tr>
+
+<tr>
+
+<td>102</td>
+
+<td>Rahul</td>
+
+<td>Student</td>
+
+<td style="color:#22c55e;">Active</td>
+
+</tr>
+
+<tr>
+
+<td>103</td>
+
+<td>Aditi</td>
+
+<td>Student</td>
+
+<td style="color:#38bdf8;">Completed</td>
+
+</tr>
+
+<tr>
+
+<td>104</td>
+
+<td>Priya</td>
+
+<td>Student</td>
+
+<td style="color:#f59e0b;">Pending</td>
+
+</tr>
+
+<tr>
+
+<td>105</td>
+
+<td>Rohan</td>
+
+<td>Student</td>
+
+<td style="color:#22c55e;">Active</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- Teacher Management -->
+
+<div class="progress-card">
+
+<h2>Teacher Management</h2>
+
+<table id="teacherTable">
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Name</th>
+
+<th>Department</th>
+
+<th>Status</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>T01</td>
+
+<td>Suvarna Joshi</td>
+
+<td>Computer Engineering</td>
+
+<td style="color:#22c55e;">Active</td>
+
+</tr>
+
+<tr>
+
+<td>T02</td>
+
+<td>R. Sharma</td>
+
+<td>Cyber Security</td>
+
+<td style="color:#22c55e;">Active</td>
+
+</tr>
+
+<tr>
+
+<td>T03</td>
+
+<td>P. Patil</td>
+
+<td>Artificial Intelligence</td>
+
+<td style="color:#22c55e;">Active</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+<!-- Algorithm Management -->
+
+<h2>Algorithm Management</h2>
+
+<div class="card-container">
+
+<div class="card">
+<h2>FIFO</h2>
+<p>Page Replacement</p>
+<button>Edit</button>
+</div>
+
+<div class="card">
+<h2>LRU</h2>
+<p>Page Replacement</p>
+<button>Edit</button>
+</div>
+
+<div class="card">
+<h2>Optimal</h2>
+<p>Page Replacement</p>
+<button>Edit</button>
+</div>
+
+<div class="card">
+<h2>Banker's</h2>
+<p>Deadlock Avoidance</p>
+<button>Edit</button>
+</div>
+
+<div class="card">
+<h2>FCFS</h2>
+<p>Disk Scheduling</p>
+<button>Edit</button>
+</div>
+
+<div class="card">
+<h2>SSTF</h2>
+<p>Disk Scheduling</p>
+<button>Edit</button>
+</div>
+
+<div class="card">
+<h2>SCAN</h2>
+<p>Disk Scheduling</p>
+<button>Edit</button>
+</div>
+
+<div class="card">
+<h2>C-SCAN</h2>
+<p>Disk Scheduling</p>
+<button>Edit</button>
+</div>
+
+<div class="card">
+<h2>LOOK</h2>
+<p>Disk Scheduling</p>
+<button>Edit</button>
+</div>
+
+<div class="card">
+<h2>C-LOOK</h2>
+<p>Disk Scheduling</p>
+<button>Edit</button>
+</div>
+
+</div>
+
+<!-- Announcements -->
+
+<h2>Announcements</h2>
+
+<div class="progress-card">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Date</th>
+
+<th>Announcement</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>20/06/2026</td>
+
+<td>New Disk Scheduling Module Added</td>
+
+</tr>
+
+<tr>
+
+<td>21/06/2026</td>
+
+<td>Quiz Portal Updated</td>
+
+</tr>
+
+<tr>
+
+<td>22/06/2026</td>
+
+<td>Teacher Dashboard Released</td>
+
+</tr>
+
+<tr>
+
+<td>23/06/2026</td>
+
+<td>Student Progress Tracking Enabled</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- Recent Activity -->
+
+<h2>Recent Activity</h2>
+
+<div class="progress-card">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Time</th>
+
+<th>Activity</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>09:00 AM</td>
+
+<td>New Student Registered</td>
+
+</tr>
+
+<tr>
+
+<td>10:15 AM</td>
+
+<td>Teacher Added Quiz</td>
+
+</tr>
+
+<tr>
+
+<td>11:30 AM</td>
+
+<td>FIFO Algorithm Updated</td>
+
+</tr>
+
+<tr>
+
+<td>01:00 PM</td>
+
+<td>Monthly Report Generated</td>
+
+</tr>
+
+<tr>
+
+<td>02:15 PM</td>
+
+<td>Admin Logged In</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- Quick Actions -->
+
+<h2>Quick Actions</h2>
+
+<div class="card-container">
+
+<div class="card">
+
+<h2>👨‍🎓 Add Student</h2>
+
+<p>Create new student account.</p>
+
+<button>Add</button>
+
+</div>
+
+<div class="card">
+
+<h2>👨‍🏫 Add Teacher</h2>
+
+<p>Create new teacher account.</p>
+
+<button>Add</button>
+
+</div>
+
+<div class="card">
+
+<h2>📚 Add Algorithm</h2>
+
+<p>Add new experiment module.</p>
+
+<button>Add</button>
+
+</div>
+
+<div class="card">
+
+<h2>📊 Generate Report</h2>
+
+<p>Create system reports.</p>
+
+<button id="generateReport">
+
+Generate
+
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>⚙ System Settings</h2>
+
+<p>Configure application settings.</p>
+
+<button>Open</button>
+
+</div>
+
+<div class="card">
+
+<h2>💾 Backup Database</h2>
+
+<p>Create backup of all records.</p>
+
+<button>Backup</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="js/theme.js"></script>
+<script src="js/admin.js"></script>
+
+</body>
+</html>

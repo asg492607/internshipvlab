@@ -1,0 +1,10 @@
+{
+  "name": "asm-virtual-lab-backend",
+  "version": "1.0.0",
+  "description": "Assembly Virtual Lab with Node.js backend for login, registration and progress tracking",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Dashboard</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<nav>
+
+<h2>Teacher Dashboard</h2>
+
+<div class="nav-right">
+
+<button id="themeToggle">
+🌙 Dark
+</button>
+
+<a href="login.html" class="back-btn">
+Logout
+</a>
+
+</div>
+
+</nav>
+<div class="dashboard">
+
+<!-- Sidebar -->
+
+<ul>
+
+<li>
+<a href="teacher-dashboard.html">
+🏠 Dashboard
+</a>
+</li>
+
+<li>👨‍🎓 Students</li>
+
+<li>📚 Algorithms</li>
+
+<li>📝 Quizzes</li>
+
+<li>📊 Reports</li>
+
+<li>🏆 Achievements</li>
+
+<li>⚙ Settings</li>
+
+<li>
+<a href="login.html">
+🚪 Logout
+</a>
+</li>
+
+</ul>
+
+<!-- Main -->
+
+<div class="main">
+
+<h1>Welcome Teacher 👩‍🏫</h1>
+
+<!-- Profile -->
+
+<div class="profile-card">
+
+<h2>Teacher Profile</h2>
+
+<p><strong>Name :</strong>
+<span id="userName">Guest</span>
+</p>
+
+<p><strong>Role :</strong> Teacher</p>
+
+<p><strong>Department :</strong> Computer Engineering</p>
+
+<p><strong>Experience :</strong> 8 Years</p>
+
+<p>
+<strong>Time :</strong>
+<span id="clock">
+00:00:00
+</span>
+</p>
+
+</div>
+
+<!-- Statistics -->
+
+<div class="stats">
+
+<div class="stat-card">
+
+<h2>45</h2>
+
+<p>Total Students</p>
+
+</div>
+
+<div class="stat-card">
+
+<h2>10</h2>
+
+<p>Algorithms</p>
+
+</div>
+
+<div class="stat-card">
+
+<h2>18</h2>
+
+<p>Reports Generated</p>
+
+</div>
+
+<div class="stat-card">
+
+<h2>6</h2>
+
+<p>Quizzes</p>
+
+</div>
+
+</div>
+
+<div class="input-card">
+
+<h2>Search Student</h2>
+
+<input
+type="text"
+id="searchStudent"
+placeholder="🔍 Search Student">
+
+</div>
+
+<!-- Student Progress -->
+
+<div class="progress-card">
+
+<h2>Student Progress</h2>
+
+<table id="studentTable">
+
+<thead>
+
+<tr>
+
+<th>Student</th>
+
+<th>Completed</th>
+
+<th>XP</th>
+
+<th>Status</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>Yug</td>
+
+<td>4 / 10</td>
+
+<td>250 XP</td>
+
+<td style="color:#22c55e;">
+Active
+</td>
+
+</tr>
+
+<tr>
+
+<td>Rahul</td>
+
+<td>7 / 10</td>
+
+<td>420 XP</td>
+
+<td style="color:#22c55e;">
+Active
+</td>
+
+</tr>
+
+<tr>
+
+<td>Aditi</td>
+
+<td>10 / 10</td>
+
+<td>650 XP</td>
+
+<td style="color:#38bdf8;">
+Completed
+</td>
+
+</tr>
+
+<tr>
+
+<td>Priya</td>
+
+<td>2 / 10</td>
+
+<td>100 XP</td>
+
+<td style="color:#f59e0b;">
+Pending
+</td>
+
+</tr>
+
+<tr>
+
+<td>Rohan</td>
+
+<td>5 / 10</td>
+
+<td>300 XP</td>
+
+<td style="color:#22c55e;">
+Active
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- Algorithms -->
+
+<h2>Algorithms Available</h2>
+
+<div class="card-container">
+
+<<a href="fifo.html" class="card">
+
+<h2>FIFO</h2>
+
+<p>Page Replacement</p>
+
+</a>
+
+<div class="card">
+
+<h2>LRU</h2>
+
+<p>Page Replacement</p>
+
+</div>
+
+<div class="card">
+
+<h2>Optimal</h2>
+
+<p>Page Replacement</p>
+
+</div>
+
+<div class="card">
+
+<h2>Banker's</h2>
+
+<p>Deadlock Avoidance</p>
+
+</div>
+
+<div class="card">
+
+<h2>FCFS</h2>
+
+<p>Disk Scheduling</p>
+
+</div>
+
+<div class="card">
+
+<h2>SSTF</h2>
+
+<p>Disk Scheduling</p>
+
+</div>
+
+<div class="card">
+
+<h2>SCAN</h2>
+
+<p>Disk Scheduling</p>
+
+</div>
+
+<div class="card">
+
+<h2>C-SCAN</h2>
+
+<p>Disk Scheduling</p>
+
+</div>
+
+<div class="card">
+
+<h2>LOOK</h2>
+
+<p>Disk Scheduling</p>
+
+</div>
+
+<div class="card">
+
+<h2>C-LOOK</h2>
+
+<p>Disk Scheduling</p>
+
+</div>
+
+</div>
+<!-- Quiz Management -->
+
+<h2>Quiz Management</h2>
+
+<div class="card-container">
+
+<div class="card">
+
+<h2>Create Quiz</h2>
+
+<p>Create new quizzes for students.</p>
+
+<button>Add Quiz</button>
+
+</div>
+
+<div class="card">
+
+<h2>Edit Quiz</h2>
+
+<p>Modify existing quiz questions.</p>
+
+<button>Edit Quiz</button>
+
+</div>
+
+<div class="card">
+
+<h2>Delete Quiz</h2>
+
+<p>Remove unwanted quizzes.</p>
+
+<button>Delete Quiz</button>
+
+</div>
+
+</div>
+
+<!-- Reports -->
+
+<h2>Reports</h2>
+
+<div class="card-container">
+
+<div class="card">
+
+<h2>Generate Report</h2>
+
+<p>Generate student performance report.</p>
+
+<button id="generateReport">
+
+Generate
+
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>Export Report</h2>
+
+<p>Export report as PDF.</p>
+
+<button>
+
+Export PDF
+
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>Attendance</h2>
+
+<p>View attendance summary.</p>
+
+<button>
+
+View
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Recent Activity -->
+
+<div class="progress-card">
+
+<h2>Recent Activity</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Time</th>
+
+<th>Activity</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>09:10 AM</td>
+
+<td>Yug completed FIFO Page Replacement</td>
+
+</tr>
+
+<tr>
+
+<td>09:45 AM</td>
+
+<td>Rahul completed LRU Page Replacement</td>
+
+</tr>
+
+<tr>
+
+<td>10:30 AM</td>
+
+<td>Aditi completed Banker's Algorithm</td>
+
+</tr>
+
+<tr>
+
+<td>11:20 AM</td>
+
+<td>New Quiz added for Disk Scheduling</td>
+
+</tr>
+
+<tr>
+
+<td>12:00 PM</td>
+
+<td>Monthly Report Generated</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- Quick Actions -->
+
+<h2>Quick Actions</h2>
+
+<div class="card-container">
+
+<div class="card">
+
+<h2>📚 Manage Algorithms</h2>
+
+<p>Add or update algorithm content.</p>
+
+</div>
+
+<div class="card">
+
+<h2>👨‍🎓 Student Records</h2>
+
+<p>Monitor student progress and scores.</p>
+
+</div>
+
+<div class="card">
+
+<h2>🏆 Achievements</h2>
+
+<p>View student badges and rewards.</p>
+
+</div>
+
+<div class="card">
+
+<h2>⚙ Settings</h2>
+
+<p>Configure the virtual laboratory.</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="js/theme.js"></script>
+<script src="js/teacher.js"></script>
+
+</body>
+</html>

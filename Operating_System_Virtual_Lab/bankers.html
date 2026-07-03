@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Banker's Algorithm</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+    
+<div class="bg"></div>
+
+<nav>
+
+<h2 id="pageTitle">Banker's Algorithm</h2>
+
+<div class="nav-right">
+
+<button id="themeToggle">
+🌙 Dark
+</button>
+
+<a href="memory-management.html" class="back-btn">
+⬅ Back
+</a>
+
+</div>
+
+</nav>
+
+<div class="fifo-container">
+
+<h1>Banker's Algorithm</h1>
+
+<div class="theory-card">
+
+<h2>Aim</h2>
+
+<p>
+To implement Banker's Algorithm for deadlock avoidance and determine whether the system is in a safe state.
+</p>
+
+</div>
+
+<div class="input-card">
+
+<h2>Simulation Input</h2>
+
+<input
+type="number"
+id="processes"
+placeholder="Number of Processes">
+
+<input
+type="number"
+id="resources"
+placeholder="Number of Resources">
+
+<button id="generateBtn">
+Generate Tables
+</button>
+
+<div id="matrixInputs"></div>
+
+<button id="runBtn">
+Run Banker's Algorithm
+</button>
+
+<button id="resetBtn">
+Reset
+</button>
+
+<button id="completeBtn">
+Mark as Completed
+</button>
+
+</div>
+
+<div class="result-card">
+
+<h2>Results</h2>
+
+<p>
+System State:
+<span id="state">
+-
+</span>
+</p>
+
+<p>
+Safe Sequence:
+<span id="sequence">
+-
+</span>
+</p>
+
+</div>
+
+<div class="result-card">
+
+<h2>Need Matrix</h2>
+
+<div id="needMatrix"></div>
+
+</div>
+
+</div>
+
+<script src="js/theme.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/bankers.js"></script>
+
+</body>
+</html>

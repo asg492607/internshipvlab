@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<nav>
+
+<h2>OS Virtual Lab</h2>
+
+<button id="themeToggle">
+🌙 Dark
+</button>
+
+</nav>
+
+<div class="dashboard">
+
+<ul>
+
+<li>🏠 Dashboard</li>
+
+<li>
+<a href="memory-management.html">
+📚 Memory Management
+</a>
+</li>
+
+<li>📊 Progress</li>
+
+<li>🏆 Achievements</li>
+
+<li>⚙ Settings</li>
+
+<li>
+<a href="login.html">
+🚪 Logout
+</a>
+</li>
+
+</ul>
+
+<div class="main">
+
+<h1>Welcome Student 👋</h1>
+
+<div class="profile-card">
+
+<h2>Student Profile</h2>
+
+<p><strong>Name:</strong>
+<span id="userName">Guest</span>
+</p>
+
+<p><strong>Role:</strong> Student</p>
+
+<p><strong>Level:</strong> Beginner</p>
+
+<p><strong>XP:</strong>
+<span id="xpValue">0</span>
+</p>
+
+</div>
+
+<div class="stats">
+
+<div class="stat-card">
+<h2>10</h2>
+<p>Algorithms</p>
+</div>
+
+<div class="stat-card">
+<h2 id="progressPercent">0%</h2>
+<p>Progress</p>
+</div>
+
+<div class="stat-card">
+<h2 id="experienceXP">0 XP</h2>
+<p>Experience</p>
+</div>
+
+</div>
+
+<div class="progress-card">
+
+<h2>Progress Tracker</h2>
+
+<div class="progress-bar">
+<div id="progressFill"></div>
+</div>
+
+<p id="progressText">0%</p>
+
+</div>
+
+<h2>Page Replacement Algorithms</h2>
+
+<div class="card-container">
+
+<a href="fifo.html" class="card" id="FIFO">
+    <h2>FIFO</h2>
+    <p>First In First Out</p>
+</a>
+
+<a href="lru.html" class="card" id="LRU">
+    <h2>LRU</h2>
+    <p>Least Recently Used</p>
+</a>
+
+<a href="optimal.html" class="card" id="Optimal">
+    <h2>Optimal</h2>
+    <p>Optimal Page Replacement</p>
+</a>
+
+</div>
+
+<h2>Deadlock Avoidance</h2>
+
+<div class="card-container">
+
+<a href="bankers.html" class="card" id="Bankers">
+    <h2>Banker's</h2>
+    <p>Deadlock Avoidance Algorithm</p>
+</a>
+
+</div>
+
+<h2>Disk Scheduling Algorithms</h2>
+
+<div class="card-container">
+
+<a href="fcfs-disk.html" class="card" id="FCFS">
+<h2>FCFS</h2>
+<p>First Come First Serve</p>
+</a>
+
+<a href="sstf.html" class="card" id="SSTF">
+<h2>SSTF</h2>
+<p>Shortest Seek Time First</p>
+</a>
+
+<a href="scan.html" class="card" id="SCAN">
+<h2>SCAN</h2>
+<p>Elevator Algorithm</p>
+</a>
+
+<a href="cscan.html" class="card" id="CSCAN">
+<h2>C-SCAN</h2>
+<p>Circular SCAN</p>
+</a>
+
+<a href="look.html" class="card" id="LOOK">
+<h2>LOOK</h2>
+<p>Optimized SCAN</p>
+</a>
+
+<a href="clook.html" class="card">
+<h2>C-LOOK</h2>
+<p>Optimized Circular LOOK</p>
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="js/theme.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/student-dashboard.js"></script>
+
+</body>
+</html>

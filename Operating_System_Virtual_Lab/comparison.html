@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Algorithm Comparison</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<nav>
+
+<h2 id="pageTitle">Compare Page Replacement Algorithms</h2>
+
+<div class="nav-right">
+
+<button id="themeToggle">
+🌙 Dark
+</button>
+
+<a href="memory-management.html" class="back-btn">
+⬅ Back
+</a>
+
+</div>
+
+</nav>
+
+<div class="fifo-container">
+
+<h1>Compare Page Replacement Algorithms</h1>
+
+<div class="input-card">
+
+<h2>Input</h2>
+
+<input
+type="number"
+id="frames"
+placeholder="Number of Frames">
+
+<input
+type="text"
+id="reference"
+placeholder="Reference String Example: 7 0 1 2 0 3 0 4">
+
+<button id="compareBtn">
+
+Compare Algorithms
+
+</button>
+
+</div>
+
+<div class="result-card">
+
+<h2>Comparison Results</h2>
+
+<table id="compareTable">
+
+<thead>
+
+<tr>
+<th>Algorithm</th>
+<th>Page Faults</th>
+<th>Page Hits</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="result-card">
+
+<h2>Best Algorithm</h2>
+
+<p id="bestAlgo">
+Run comparison to see result.
+</p>
+
+</div>
+
+</div>
+
+<script src="js/theme.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/comparison.js"></script>
+
+</body>
+</html>

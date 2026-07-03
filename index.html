@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIT ADT Virtual Labs Portal</title>
+    <meta name="description" content="Central portal for all interactive virtual laboratories.">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔬</text></svg>">
+</head>
+<body>
+    <div class="background-animation">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <header class="main-header glass">
+        <div class="logo">
+            <span class="logo-icon">🔬</span>
+            <h1>Virtual Labs Portal</h1>
+        </div>
+        <nav class="nav-links">
+            <span>Interactive Learning Platform</span>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="hero-section">
+            <h2 class="hero-title">Experience <span>Next-Gen</span> Interactive Learning</h2>
+            <p class="hero-subtitle">Access highly immersive virtual environments for programming, operating systems, electronics, and assembly architecture directly from your browser.</p>
+        </section>
+
+        <section class="labs-grid">
+            <!-- Lab 1: Programming -->
+            <a href="Programming_Virtual_Lab/index.html" class="lab-card glass">
+                <div class="card-icon blue">💻</div>
+                <div class="card-content">
+                    <h3>Programming Lab</h3>
+                    <p>Practice C, C++, Java, and Python with our integrated web compiler and standard experiments.</p>
+                </div>
+                <div class="card-footer">
+                    <span>Enter Lab</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <!-- Lab 2: OS -->
+            <a href="Operating_System_Virtual_Lab/index.html" class="lab-card glass">
+                <div class="card-icon purple">🖥️</div>
+                <div class="card-content">
+                    <h3>Operating Systems Lab</h3>
+                    <p>Interactive simulations of Page Replacement, Deadlock Avoidance, and Disk Scheduling Algorithms.</p>
+                </div>
+                <div class="card-footer">
+                    <span>Enter Lab</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <!-- Lab 3: EEE & DELD -->
+            <a href="EEE_DELD_Virtual_Lab/index.html" class="lab-card glass">
+                <div class="card-icon green">⚡</div>
+                <div class="card-content">
+                    <h3>EEE & DELD Lab</h3>
+                    <p>Electrical circuits, machines, logic gates, multiplexers, and hardware measurements.</p>
+                </div>
+                <div class="card-footer">
+                    <span>Enter Lab</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <!-- Lab 4: Assembly -->
+            <a href="Assembly_Virtual_Lab/asm_backend_project/public/index.html" class="lab-card glass">
+                <div class="card-icon orange">⚙️</div>
+                <div class="card-content">
+                    <h3>Assembly Lab</h3>
+                    <p>Learn low-level system architecture and x86 Assembly instructions with a virtual 8086 emulator.</p>
+                </div>
+                <div class="card-footer">
+                    <span>Enter Lab</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+        </section>
+    </main>
+
+    <footer class="main-footer glass">
+        <p>&copy; 2026 Virtual Labs Initiative. Built for immersive digital education.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>C-SCAN Disk Scheduling</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+    
+<div class="bg"></div>
+
+<nav>
+
+<h2 id="pageTitle">C-SCAN Disk Scheduling</h2>
+
+<div class="nav-right">
+
+<button id="themeToggle">
+🌙 Dark
+</button>
+
+<a href="memory-management.html" class="back-btn">
+⬅ Back
+</a>
+
+</div>
+
+</nav>
+
+<div class="fifo-container">
+
+<h1>C-SCAN Disk Scheduling</h1>
+
+<div class="theory-card">
+
+<h2>Aim</h2>
+
+<p>
+To implement the Circular SCAN (C-SCAN) Disk Scheduling algorithm and provide uniform waiting time for disk requests.
+</p>
+
+</div>
+
+<div class="input-card">
+
+<h2>Simulation Input</h2>
+
+<input
+type="number"
+id="head"
+placeholder="Initial Head Position">
+
+<input
+type="text"
+id="requests"
+placeholder="Request Queue Example: 98 183 37 122 14 124 65 67">
+
+<button id="runBtn">
+Run Simulation
+</button>
+
+<button id="resetBtn">
+Reset
+</button>
+
+<button id="completeBtn">
+Mark as Completed
+</button>
+
+</div>
+
+<div class="result-card">
+
+<h2>Results</h2>
+
+<p>
+Total Head Movement:
+<span id="movement">
+0
+</span>
+</p>
+
+<p>
+Seek Sequence:
+<span id="sequence">
+-
+</span>
+</p>
+
+</div>
+
+<div class="result-card">
+
+<h2>Execution Table</h2>
+
+<table id="diskTable">
+
+<thead>
+
+<tr>
+<th>Step</th>
+<th>From</th>
+<th>To</th>
+<th>Movement</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="result-card">
+
+<h2>Disk Head Movement Graph</h2>
+
+<canvas id="diskCanvas"
+width="1200"
+height="500">
+</canvas>
+
+</div>
+
+</div>
+
+<script src="js/theme.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/cscan.js"></script>
+
+</body>
+</html>
