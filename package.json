@@ -9,6 +9,6 @@
   "dependencies": {
     "express": "latest",
     "cors": "latest",
-    "sqlite3": "latest"
+    "sqlite3": "5.1.6"
   }
 }
