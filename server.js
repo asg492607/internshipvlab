@@ -157,7 +157,7 @@ app.post('/api/asm/logout', (req, res) => {
 app.use(express.static(ROOT));
 
 // Fallback to index.html for root requests
-app.get('*', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(ROOT, 'index.html'));
 });
 
