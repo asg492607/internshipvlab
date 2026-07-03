@@ -1,0 +1,14 @@
+{
+  "name": "virtual-labs-portal",
+  "version": "1.0.0",
+  "description": "Unified Web Service for Virtual Labs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "latest",
+    "cors": "latest",
+    "sqlite3": "latest"
+  }
+}

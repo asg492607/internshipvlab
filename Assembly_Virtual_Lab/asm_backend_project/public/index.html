@@ -3051,7 +3051,7 @@ function saveProgressToBackend() {
   if (!apiAvailable || !apiToken) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
-    apiFetch('/api/progress', {
+    apiFetch('/api/asm/progress', {
       method: 'POST',
       body: JSON.stringify({ progressStore, quizState })
     }).catch(() => {});
@@ -3071,7 +3071,7 @@ async function doSignup() {
   if (pass !== confirm) return showSignupError('Passwords do not match.');
 
   try {
-    await apiFetch('/api/register', {
+    await apiFetch('/api/asm/register', {
       method: 'POST',
       body: JSON.stringify({ name, roll: rollRaw, password: pass })
     });
@@ -3099,7 +3099,7 @@ async function doLogin() {
   if (!pass) { err.textContent = 'Please enter your password.'; err.style.display = 'block'; return; }
 
   try {
-    const data = await apiFetch('/api/login', {
+    const data = await apiFetch('/api/asm/login', {
       method: 'POST',
       body: JSON.stringify({ roll: rollRaw, password: pass })
     });
@@ -3117,7 +3117,7 @@ async function doLogin() {
 
 async function doLogout() {
   if (apiAvailable && apiToken) {
-    try { await apiFetch('/api/logout', { method: 'POST', body: '{}' }); } catch (e) {}
+    try { await apiFetch('/api/asm/logout', { method: 'POST', body: '{}' }); } catch (e) {}
   }
   apiToken = '';
   localStorage.removeItem('asmlab_api_token');
@@ -3164,7 +3164,7 @@ function resetQuiz(expId) {
 async function apiBootstrapSession() {
   if (!apiAvailable || !apiToken) return;
   try {
-    const data = await apiFetch('/api/me');
+    const data = await apiFetch('/api/asm/me');
     syncUserDisplay(data.user.name || data.user.roll || 'Student');
     loadServerProgress(data.progress);
     switchPage('dashboard-page');
